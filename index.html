@@ -1,0 +1,3067 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Bảo trình duyệt hỏi lại máy chủ mỗi lần mở, thay vì dùng bản đã lưu.
+     Nếu không, sửa file rồi upload lên mà mở ra vẫn là bản cũ.          -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Lexend — font dựng riêng cho việc đọc, tải từ Google Fonts. Nếu máy
+     không có mạng thì tự rơi về font hệ thống, app vẫn đọc được bình thường. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300..700&display=swap" rel="stylesheet">
+<title>Phòng học</title>
+<style>
+:root{
+  --ink:#0E1F33; --ink2:#3C556F; --ink3:#7A8CA0;
+  --paper:#EDF0F4; --card:#FFFFFF; --line:#D6DDE6;
+  --blue:#1F6FA8; --tab:#9FC7DE;
+  --ok:#12735A; --okbg:#E7F3EE; --okln:#BFDDD1;
+  --no:#AE3220; --nobg:#FBEAE6; --noln:#EBC9C1;
+  --amber:#B87A18; --ambbg:#FBF3E4; --ambln:#EBDCBD;
+  --r:3px;
+  --sh:0 1px 0 rgba(14,31,51,.06), 0 8px 24px -16px rgba(14,31,51,.4);
+  /* Chữ serif dựng cho MÀN HÌNH, không phải cho báo in: Charter và Constantia
+     có nét dày hơn, chân rộng hơn Times nên đỡ nhòe ở cỡ nhỏ.               */
+  --read:"Charter","Bitstream Charter","Constantia","Cambria","Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;
+  --serif:var(--read);
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --lexend:"Lexend",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Consolas,monospace;
+  --body:var(--read);
+  --base:16.5px; --stem:20px; --lh:1.62;
+  --field:#FBFCFD; --hover:#F1F5F9; --hover2:#F7FAFC; --white:#FFFFFF;
+}
+/* ------- cỡ chữ ------- */
+:root[data-size=s]{--base:15px;--stem:18px;--lh:1.55}
+:root[data-size=l]{--base:18px;--stem:22.5px;--lh:1.7}
+/* ------- kiểu chữ ------- */
+:root[data-font=sans]{--body:var(--sans)}
+/* Lexend có thân chữ cao hơn Charter nên cùng cỡ px trông to hơn — hạ nhẹ
+   để mật độ chữ trên màn hình giữ nguyên như cũ. Áp cho cả tiêu đề lẫn đề
+   bài, vì mục đích của font này là đọc, không phải trang trí.            */
+:root[data-font=lexend]{--body:var(--lexend);--serif:var(--lexend);--base:15.8px;--stem:19px}
+:root[data-font=lexend][data-size=s]{--base:14.4px;--stem:17.2px}
+:root[data-font=lexend][data-size=l]{--base:17.2px;--stem:21.4px}
+/* ------- nền ngà: bớt chói, giữ độ tương phản đọc được ------- */
+:root[data-theme=ivory]{
+  --paper:#EFE9DE; --card:#FBF7F0; --line:#DED3C2; --white:#FBF7F0;
+  --ink:#2C2721; --ink2:#574F44; --ink3:#8C8275;
+  --field:#FCFAF5; --hover:#F3EDE2; --hover2:#F6F1E7;
+  --okbg:#E8F1E9; --ambbg:#F8EFDC; --nobg:#F8E9E4;
+}
+/* ------- nền tối cho buổi tối ------- */
+:root[data-theme=dark]{
+  --paper:#151A20; --card:#1E242C; --line:#333D48; --white:#1E242C;
+  --ink:#E3E9F0; --ink2:#AFBAC6; --ink3:#7C8896;
+  --field:#182028; --hover:#262F39; --hover2:#232C36;
+  --blue:#5FADDF; --tab:#3F6D89;
+  --ok:#54C1A0; --okbg:#14302A; --okln:#22574A;
+  --no:#EA9182; --nobg:#361D19; --noln:#68342A;
+  --amber:#E0B25C; --ambbg:#33290F; --ambln:#5C4919;
+  --sh:0 1px 0 rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:var(--base);line-height:var(--lh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 90px}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.hidden{display:none!important}
+
+.topbar{border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
+.tin{max-width:880px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-size:17px;font-weight:700;margin:0}
+.brand em{font-style:normal;color:var(--blue)}
+.sp{flex:1}
+.lk{background:none;border:none;color:var(--ink2);font-size:13px;padding:4px 6px;border-radius:var(--r)}
+.lk:hover{color:var(--blue);background:var(--hover)}
+select.subjsel{border:1px solid var(--line);background:var(--field);border-radius:var(--r);padding:5px 8px;font-size:13px;color:var(--ink);max-width:230px}
+
+h1{font-family:var(--serif);font-size:29px;line-height:1.2;margin:30px 0 6px;font-weight:700;letter-spacing:-.01em}
+h2{font-family:var(--serif);font-size:19px;margin:0 0 10px;font-weight:700}
+h3{font-family:var(--serif);font-size:16px;margin:0 0 6px;font-weight:700}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
+.lede{color:var(--ink2);margin:0 0 24px;max-width:62ch;font-family:var(--body)}
+.muted{color:var(--ink3)} .sm{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:var(--sh)}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 5px;color:var(--ink2)}
+input[type=text],input[type=date],input[type=number],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);background:var(--field);color:var(--ink);font-family:inherit;font-size:15px}
+textarea{font-family:var(--mono);font-size:12.5px;line-height:1.55;resize:vertical;min-height:140px}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);background:var(--white);outline:none;box-shadow:0 0 0 3px rgba(31,111,168,.13)}
+.btn{background:var(--blue);color:#fff;border:1px solid var(--blue);padding:9px 18px;border-radius:var(--r);font-weight:600}
+.btn:hover{background:#1A5F8F;border-color:#1A5F8F}
+.btn.ghost{background:var(--white);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--hover);border-color:var(--ink3)}
+.btn.danger{background:var(--white);color:var(--no);border-color:var(--noln)}
+.btn.danger:hover{background:var(--nobg)}
+.btn.sm{padding:5px 11px;font-size:13px;font-weight:500}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{margin-bottom:16px}
+.hint{font-size:12.5px;color:var(--ink3);margin-top:5px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--ink2);font-weight:400;margin-bottom:8px}
+.chk input{margin-top:3px;accent-color:var(--blue)}
+
+/* ---- hero ---- */
+.hero{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:16px}
+.hero .band{height:5px;background:var(--blue)}
+.hero.love .band{background:var(--amber)}
+.hero.soon .band{background:var(--tab)}
+.hin{padding:24px 26px 26px}
+.status{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin:0 0 10px}
+.status b{color:var(--ink)}
+.gobtn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:20px;text-align:left;display:flex;align-items:center;gap:16px}
+.gobtn:hover{background:#1A5F8F}
+.gobtn .big{font-family:var(--serif);font-size:22px;font-weight:700;display:block;line-height:1.2}
+.gobtn .sub{font-size:13px;opacity:.85;display:block;margin-top:2px}
+.gobtn .arrow{margin-left:auto;font-size:24px;opacity:.8}
+.gobtn[disabled]{background:#B9C6D2;cursor:not-allowed}
+/* Hai ô: Ôn tập | Học bài mới */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.duo{grid-template-columns:1fr}}
+.duo .gobtn{height:100%;align-items:flex-start}
+.gobtn.learn{background:var(--ok)}
+.gobtn.learn:hover{background:#1F6B4E}
+.gobtn.learn[disabled]{background:#B9C6D2}
+.meters{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px}
+.meter{flex:1;min-width:150px}
+.meter .lab{font-size:12px;color:var(--ink3);margin-bottom:5px}
+.meter .val{font-family:var(--serif);font-size:24px;font-weight:700;line-height:1}
+.bar{height:7px;background:var(--hover);border-radius:20px;overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;background:var(--blue)}
+.bar i.g{background:var(--ok)} .bar i.y{background:var(--amber)} .bar i.r{background:var(--no)}
+.note{background:var(--ambbg);border:1px solid var(--ambln);border-radius:var(--r);padding:11px 14px;font-size:13.5px;color:#7A5210;margin-top:14px}
+.note.blue{background:var(--hover2);border-color:var(--tab);color:var(--blue)}
+.readrow{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink2)}
+.readrow .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.readrow b{color:var(--ink)}
+.readbtn{background:none;border:none;color:var(--blue);font-size:13.5px;padding:2px 5px;border-radius:var(--r);text-decoration:underline;text-underline-offset:2px}
+.readbtn:hover{background:var(--hover2);text-decoration:none}
+
+/* ---- session ---- */
+.shead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:22px 0 12px}
+.pill{font-family:var(--mono);font-size:12px;padding:3px 10px;border:1px solid var(--line);border-radius:20px;background:var(--white);color:var(--ink2)}
+.pill.warn{color:var(--no);border-color:var(--noln);background:var(--nobg)}
+.pbar{height:6px;background:var(--hover);border-radius:20px;overflow:hidden;margin-bottom:14px}
+.pbar i{display:block;height:100%;background:var(--ok);transition:width .3s ease}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:22px 26px 24px;min-height:240px}
+.qmeta{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tagx{border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+.tagx.saq{color:var(--amber);border-color:var(--ambln);background:var(--ambbg)}
+.tagx.vig{color:var(--blue);border-color:var(--tab);background:var(--hover2)}
+.tagx.crit{color:var(--ok);border-color:var(--okln);background:var(--okbg)}
+.stem{font-family:var(--serif);font-size:var(--stem);line-height:1.6;margin:0 0 18px;white-space:pre-wrap;max-width:64ch}
+/* ---- Hình gắn vào câu hỏi / đáp án ---- */
+.imgrow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.imgrow:empty{display:none}
+.shot{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card);line-height:0}
+.shot img{max-width:190px;max-height:150px;width:auto;height:auto;display:block;cursor:zoom-in}
+.shot .rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border:none;border-radius:50%;
+  background:rgba(14,31,51,.72);color:#fff;font-size:14px;line-height:22px;padding:0;cursor:pointer;text-align:center}
+.shot .rm:hover{background:#B4342A}
+.imgtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;
+  padding-top:12px;border-top:1px dashed var(--line)}
+.imgtools .lbl{font-size:12px;color:var(--ink3);margin-right:2px}
+/* Xem hình phóng to */
+#lightbox{position:fixed;inset:0;z-index:90;background:rgba(8,16,28,.88);display:flex;
+  align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+#lightbox img{max-width:100%;max-height:100%;border-radius:6px}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:calc(var(--base) - .5px);line-height:1.5;color:var(--ink)}
+.opt:hover:not([disabled]){border-color:var(--blue);background:var(--hover2)}
+.opt .k{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--ink3);border:1px solid var(--line);border-radius:2px;width:23px;height:23px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--field);margin-top:2px}
+.opt.correct{background:var(--okbg);border-color:var(--okln)}
+.opt.correct .k{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{background:var(--nobg);border-color:var(--noln)}
+.opt.wrong .k{background:var(--no);color:#fff;border-color:var(--no)}
+.opt[disabled]{cursor:default}
+.saqin{width:100%;min-height:120px;font-family:var(--body);font-size:var(--base);line-height:1.6}
+.fb{margin-top:16px;border-radius:var(--r);padding:14px 16px;border:1px solid}
+.fb.ok{background:var(--okbg);border-color:var(--okln)}
+.fb.no{background:var(--nobg);border-color:var(--noln)}
+.fb .verdict{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.fb.ok .verdict{color:var(--ok)} .fb.no .verdict{color:var(--no)}
+.fb .body{font-size:calc(var(--base) - 1.5px);line-height:1.65;color:var(--ink2);white-space:pre-wrap;max-width:66ch}
+.keylist{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+.kc{font-size:13px;padding:3px 10px;border-radius:20px;border:1px solid;background:var(--white)}
+.kc.hit{color:var(--ok);border-color:var(--okln)}
+.kc.miss{color:var(--no);border-color:var(--noln)}
+.model{margin-top:9px;padding:11px 14px;background:var(--white);border-left:3px solid var(--blue);font-size:calc(var(--base) - 1.5px);line-height:1.65;white-space:pre-wrap}
+.model .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:3px}
+.acts{display:flex;gap:9px;align-items:center;margin-top:16px;flex-wrap:wrap}
+
+/* ---- lists ---- */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600;padding:0 10px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.cell{display:inline-block;font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:20px;border:1px solid;white-space:nowrap}
+.cell.g{color:var(--ok);background:var(--okbg);border-color:var(--okln)}
+.cell.y{color:var(--amber);background:var(--ambbg);border-color:var(--ambln)}
+.cell.r{color:var(--no);background:var(--nobg);border-color:var(--noln)}
+.cell.n{color:var(--ink3);background:#F4F5F7;border-color:var(--line)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3);margin:10px 2px 0}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.empty{text-align:center;padding:38px 20px;color:var(--ink3)}
+.srow{cursor:pointer}
+.srow:hover td{background:var(--hover2)}
+.srow.act td{background:var(--hover2)}
+.srow .nm{font-weight:600}
+.srow .why{font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.4}
+.mtag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:20px;padding:1px 7px;color:var(--ink3);white-space:nowrap}
+.mtag.exam{color:var(--blue);border-color:var(--tab);background:var(--hover2)}
+.mtag.love{color:var(--amber);border-color:var(--ambln);background:var(--ambbg)}
+.rank{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink3);width:22px}
+.rank.top{color:var(--no)}
+.todo{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+.swap{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:4px 10px;font-size:12.5px;color:var(--blue)}
+.swap:hover{border-color:var(--blue);background:var(--hover2)}
+
+/* ---- modal ---- */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(14,31,51,.55);display:flex;align-items:center;justify-content:center;padding:20px}
+.mbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 30px 60px -20px rgba(14,31,51,.6);max-width:480px;width:100%;padding:26px;max-height:88vh;overflow:auto}
+.mbox h2{margin:0 0 4px}
+.mbox .sub{font-size:13px;color:var(--ink3);margin:0 0 18px}
+.pick{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;margin-bottom:8px;background:var(--white);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);padding:12px 14px;color:var(--ink)}
+.pick:hover{background:var(--hover2)}
+/* Hàng trong bảng "Học bài mới": ô tick bên trái, nút chọn bài bên phải */
+.lrow2{display:flex;gap:10px;align-items:stretch;margin-bottom:8px}
+.tickwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  flex:0 0 auto;padding:0 10px;border:1px dashed var(--line);border-radius:var(--r);
+  background:var(--white);cursor:pointer;user-select:none}
+.tickwrap:hover{border-color:var(--ok);background:var(--hover2)}
+.tickwrap span{font-size:10.5px;color:var(--ink3);font-family:var(--mono);letter-spacing:.02em}
+.tickwrap input.tick{width:18px;height:18px;margin:0;cursor:pointer;accent-color:var(--ok)}
+.tickwrap:has(input:checked){border-style:solid;border-color:var(--ok);background:#EEF6F1}
+.tickwrap:has(input:checked) span{color:var(--ok)}
+@media(max-width:520px){ .tickwrap span{display:none} .tickwrap{padding:0 12px} }
+.pick b{display:block;font-size:15px;margin-bottom:1px}
+.pick span{font-size:12.5px;color:var(--ink2);font-weight:400}
+.pick[data-v=sure]{border-left-color:var(--ok)} .pick[data-v=sure]:hover{border-color:var(--ok)}
+.pick[data-v=unsure]{border-left-color:var(--amber)} .pick[data-v=unsure]:hover{border-color:var(--amber)}
+.pick[data-v=weak]{border-left-color:var(--no)} .pick[data-v=weak]:hover{border-color:var(--no)}
+.optrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.ob{flex:1;min-width:78px;border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:var(--r);padding:10px 8px;text-align:center;font-size:13.5px}
+.ob:hover{border-color:var(--blue);background:var(--hover2)}
+.ob[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue);color:var(--blue);font-weight:600}
+.samp{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--card);margin-bottom:16px}
+.samp p{margin:0;font-family:var(--serif);font-size:var(--stem);line-height:1.6}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:70;background:var(--ink);color:#fff;padding:11px 20px;border-radius:var(--r);font-size:14px;box-shadow:0 10px 30px -10px rgba(14,31,51,.6);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.toast.bad{background:var(--no)}
+
+/* ---- setup steps ---- */
+.steps{display:flex;margin:24px 0 20px;border-bottom:1px solid var(--line)}
+.step{padding:8px 15px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);border:none;border-bottom:2px solid transparent;background:none}
+.step[aria-current=true]{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+.lrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lrow:last-child{border-bottom:none}
+.lrow .ix{font-family:var(--mono);font-size:12px;color:var(--ink3);width:24px;flex:none}
+.lrow input{flex:1}
+.modecard{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--white);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px;color:var(--ink)}
+.modecard:hover{background:var(--hover2)}
+.modecard[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.modecard b{display:block;font-size:15px;margin-bottom:2px}
+.modecard span{font-size:12.5px;color:var(--ink2);font-weight:400}
+.modecard[data-m=exam]{border-left-color:var(--blue)}
+.modecard[data-m=soon]{border-left-color:var(--tab)}
+.modecard[data-m=love]{border-left-color:var(--amber)}
+
+@media (max-width:640px){
+  h1{font-size:23px}
+  .qcard{padding:18px 16px 20px}
+  .stem{font-size:17px}
+  .hin{padding:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="tin">
+  <p class="brand">Phòng <em>học</em></p>
+  <select class="subjsel hidden" id="subjSel"></select>
+  <span class="sp"></span>
+  <button class="lk" id="navSync" title="Đồng bộ với điện thoại">⇅</button>
+  <button class="lk" id="navRead" title="Cỡ chữ, kiểu chữ, nền" style="font-family:var(--serif);font-size:15px">Aa</button>
+  <button class="lk" id="navHome">Hôm nay</button>
+  <button class="lk" id="navMap">Bản đồ</button>
+  <button class="lk" id="navBank">Ngân hàng</button>
+</div></div>
+
+<div class="wrap">
+
+<!-- ============ SETUP ============ -->
+<section id="v-setup" class="hidden">
+  <p class="eyebrow" id="setupEyebrow">Thiết lập</p>
+  <h1 id="setupTitle">Thêm một môn học</h1>
+  <p class="lede">Ba bước: đặt tên môn và cách bạn học nó, liệt kê các bài, rồi dán câu hỏi. Mọi thứ lưu trong trình duyệt này.</p>
+
+  <div class="steps">
+    <button class="step" data-s="1" aria-current="true">1 · Môn</button>
+    <button class="step" data-s="2">2 · Bài</button>
+    <button class="step" data-s="3">3 · Câu hỏi</button>
+  </div>
+
+  <div class="card" id="st1">
+    <div class="field">
+      <label for="sName">Tên môn học</label>
+      <input type="text" id="sName" placeholder="Ví dụ: Bướu đường tiết niệu trên" autocomplete="off">
+    </div>
+    <label>Bạn đang học môn này trong hoàn cảnh nào?</label>
+    <button class="modecard" data-m="exam"><span><b>Đã có lịch thi</b><span>Biết ngày thi. App sẽ nén lịch ôn để mọi bài kịp ôn trước ngày đó.</span></span></button>
+    <button class="modecard" data-m="soon"><span><b>Học trước, chưa có ngày thi</b><span>Bộ môn chưa công bố lịch. App giữ bạn ở trạng thái sẵn sàng thi bất cứ lúc nào, và nén lịch ngay khi bạn nhập ngày.</span></span></button>
+    <button class="modecard" data-m="love"><span><b>Học vì thích, không thi</b><span>Không đếm ngược, không nhắc phủ sóng. Khoảng cách ôn được kéo dài, mỗi ngày một ít.</span></span></button>
+    <div class="field hidden" id="dateWrap" style="margin-top:14px">
+      <label for="sDate">Ngày thi</label>
+      <input type="date" id="sDate">
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="st1next">Tiếp tục</button>
+      <button class="btn ghost hidden" id="st1cancel">Hủy</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="st2">
+    <h2>Các bài trong môn</h2>
+    <p class="hint" style="margin:0 0 14px">Đặt tên theo cách bạn hay gọi. Thêm bài mới bất cứ lúc nào ở mục Ngân hàng.</p>
+    <div id="lrows"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost sm" id="addRow">+ Thêm bài</button><span class="sp"></span>
+      <button class="btn ghost" id="st2back">Quay lại</button>
+      <button class="btn" id="st2next">Tiếp tục</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="st3">
+    <h2>Dán câu hỏi vào một bài</h2>
+    <p class="hint" style="margin:0 0 16px">Dán thẳng từ file Word hoặc từ câu trả lời của AI. Định dạng giống hệt bản cũ.</p>
+    <div class="row" style="gap:14px;align-items:flex-end;margin-bottom:16px">
+      <div class="field" style="flex:1;min-width:170px;margin:0"><label for="impLesson">Nhập vào bài</label><select id="impLesson"></select></div>
+      <div class="field" style="width:190px;margin:0"><label for="impKind">Loại</label>
+        <select id="impKind"><option value="mcq">Trắc nghiệm (MCQ)</option><option value="saq">Tự luận ngắn (SAQ)</option></select></div>
+    </div>
+    <div class="field"><label for="impQ" id="lbQ">Đề — câu hỏi và phương án</label><textarea id="impQ"></textarea>
+      <p class="hint">Dán vào, hoặc kéo thả một file .txt/.md vào ô này, hoặc <button class="lk" style="padding:0;text-decoration:underline" data-pick="impQ">chọn file</button>.</p></div>
+    <div class="field"><label for="impK" id="lbK">Đáp án và giải thích</label><textarea id="impK"></textarea>
+      <p class="hint">Kéo thả file vào ô này, hoặc <button class="lk" style="padding:0;text-decoration:underline" data-pick="impK">chọn file</button>.</p></div>
+    <div class="row">
+      <button class="btn" id="doImp">Thêm vào bài</button>
+      <button class="btn ghost" id="st3back">Quay lại</button><span class="sp"></span>
+      <button class="btn ghost" id="st3done">Xong</button>
+    </div>
+    <p class="hint" id="impRep"></p>
+  </div>
+</section>
+
+<!-- ============ HOME ============ -->
+<section id="v-home" class="hidden">
+  <p class="eyebrow" id="hEyebrow"></p>
+  <h1 id="hTitle"></h1>
+
+  <div class="hero" id="hero">
+    <div class="band"></div>
+    <div class="hin">
+      <p class="status" id="hStatus"></p>
+      <div class="duo">
+        <button class="gobtn" id="goBtn">
+          <span><span class="big" id="goBig">Ôn tập</span><span class="sub" id="goSub"></span></span>
+          <span class="arrow">→</span>
+        </button>
+        <button class="gobtn learn" id="learnBtn">
+          <span><span class="big" id="learnBig">Học bài mới</span><span class="sub" id="learnSub"></span></span>
+          <span class="arrow">→</span>
+        </button>
+      </div>
+      <div class="row" style="margin-top:10px"><span class="sp"></span><button class="lk hidden" id="goExtra">Vẫn muốn học thêm hôm nay →</button></div>
+      <div id="hRead"></div>
+      <div class="meters" id="hMeters"></div>
+      <div id="hWhy"></div>
+      <div id="hNotes"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="btn ghost sm" id="btnExam">Nhập / sửa ngày thi</button>
+      <button class="btn ghost sm" id="btnMock">Thi thử 100 câu</button>
+      <button class="btn ghost sm" id="btnFree">Ôn một bài cụ thể</button>
+      <span class="sp"></span>
+      <button class="btn ghost sm" id="btnAddSubj">+ Thêm môn</button>
+      <button class="lk" id="btnSuspect">Hộp nghi ngờ (<span id="suspN">0</span>)</button>
+    </div>
+  </div>
+
+  <div id="boardBox"></div>
+  <div id="calibBox"></div>
+</section>
+
+<!-- ============ SESSION ============ -->
+<section id="v-run" class="hidden">
+  <div class="shead">
+    <span class="pill" id="rProg">0 / 0</span>
+    <span class="pill" id="rAtt">0 lượt</span>
+    <span class="pill hidden" id="rTimer">--:--</span>
+    <span class="sp"></span>
+    <button class="btn ghost sm" id="rQuit">Dừng phiên</button>
+  </div>
+  <div class="pbar"><i id="rBar" style="width:0%"></i></div>
+  <div class="qcard">
+    <div class="qmeta" id="rMeta"></div>
+    <p class="stem" id="rStem"></p>
+    <div class="imgrow" id="rImgQ"></div>
+    <div class="opts" id="rOpts"></div>
+    <div class="hidden" id="rSaq"><textarea class="saqin" id="rInput" placeholder="Viết câu trả lời của bạn…" spellcheck="false"></textarea></div>
+    <div class="acts" id="rActs"></div>
+    <div id="rFb"></div>
+  </div>
+  <p class="hint" id="rHint"></p>
+</section>
+
+<!-- ============ SESSION SUMMARY ============ -->
+<section id="v-done" class="hidden">
+  <p class="eyebrow">Kết thúc phiên</p>
+  <h1 id="dTitle">Xong</h1>
+  <div class="card" id="dBox"></div>
+  <div class="card" id="dCalib"></div>
+  <div class="row"><button class="btn" id="dHome">Về trang chính</button><button class="btn ghost" id="dAgain">Làm thêm một phiên</button></div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section id="v-map" class="hidden">
+  <p class="eyebrow">Bản đồ</p>
+  <h1 id="mTitle">Tình trạng từng bài</h1>
+  <p class="lede">Bảng này để xem, không phải để chọn — phiên hàng ngày đã tự lấy câu từ những bài yếu nhất.</p>
+  <div class="card" style="padding:6px 20px"><table class="tbl" id="mTbl"></table></div>
+  <div class="legend">
+    <span><i style="background:var(--ok)"></i>nhớ tốt, trên 85%</span>
+    <span><i style="background:var(--amber)"></i>lung lay, 65–85%</span>
+    <span><i style="background:var(--no)"></i>yếu, dưới 65%</span>
+    <span><i style="background:#C3D3E0"></i>chưa đụng tới</span>
+  </div>
+</section>
+
+<!-- ============ BANK ============ -->
+<section id="v-bank" class="hidden">
+  <p class="eyebrow">Ngân hàng</p>
+  <h1>Bài và câu hỏi</h1>
+  <div class="card">
+    <h2>Môn học</h2>
+    <div class="field"><label for="bName">Tên môn</label><div class="row"><input type="text" id="bName" style="flex:1;min-width:200px"><button class="btn ghost sm" id="bSaveName">Lưu</button></div></div>
+    <div class="row"><button class="btn ghost sm" id="bNewSubj">+ Thêm môn mới</button><span class="sp"></span><button class="btn danger sm" id="bDelSubj">Xóa môn này</button></div>
+  </div>
+  <div class="card">
+    <h2>Các bài</h2>
+    <table class="tbl" id="bTbl"></table>
+    <div class="row" style="margin-top:14px"><input type="text" id="bNewLesson" placeholder="Tên bài mới" style="flex:1;min-width:200px"><button class="btn ghost" id="bAddLesson">Thêm bài</button></div>
+  </div>
+  <div class="card">
+    <h2>Nhập thêm câu hỏi</h2>
+    <div class="row" style="gap:14px;align-items:flex-end;margin-bottom:16px">
+      <div class="field" style="flex:1;min-width:170px;margin:0"><label for="bLesson">Nhập vào bài</label><select id="bLesson"></select></div>
+      <div class="field" style="width:190px;margin:0"><label for="bKind">Loại</label>
+        <select id="bKind"><option value="mcq">Trắc nghiệm (MCQ)</option><option value="saq">Tự luận ngắn (SAQ)</option></select></div>
+    </div>
+    <div class="field"><label for="bQ" id="lbBQ">Đề — câu hỏi và phương án</label><textarea id="bQ"></textarea>
+      <p class="hint">Dán vào, hoặc kéo thả một file .txt/.md vào ô này, hoặc <button class="lk" style="padding:0;text-decoration:underline" data-pick="bQ">chọn file</button>.</p></div>
+    <div class="field"><label for="bK" id="lbBK">Đáp án và giải thích</label><textarea id="bK"></textarea>
+      <p class="hint">Kéo thả file vào ô này, hoặc <button class="lk" style="padding:0;text-decoration:underline" data-pick="bK">chọn file</button>.</p></div>
+    <div class="row"><button class="btn" id="bImp">Thêm vào bài</button><span class="hint" id="bRep" style="margin:0"></span></div>
+  </div>
+  <div class="card">
+    <h2>Sao lưu</h2>
+    <p class="hint" style="margin:0 0 12px">Dữ liệu nằm trong trình duyệt này. Xóa dữ liệu duyệt web là mất — hãy tải sao lưu sau mỗi đợt nhập lớn.</p>
+    <div class="row"><button class="btn ghost" id="expBtn">Tải file sao lưu</button><button class="btn ghost" id="impBtn">Nạp từ sao lưu</button><button class="btn ghost" id="syncBtn">Đồng bộ điện thoại</button>
+      <input type="file" id="impFile" accept="application/json" class="hidden"><span class="sp"></span>
+      <button class="btn danger" id="wipeBtn">Xóa toàn bộ</button></div>
+  </div>
+</section>
+
+<!-- ============ SUSPECT ============ -->
+<section id="v-susp" class="hidden">
+  <p class="eyebrow">Hộp nghi ngờ</p>
+  <h1>Câu bạn đánh dấu là sai</h1>
+  <p class="lede">Những câu này đã ngừng xuất hiện trong phiên học. Đối chiếu tài liệu rồi quyết định: trả lại nếu thật ra nó đúng, xóa hẳn nếu sai.</p>
+  <div id="suspList"></div>
+</section>
+
+</div>
+
+<input type="file" id="txtFile" accept=".txt,.md,.text,text/plain" class="hidden">
+<div class="modal hidden" id="modal"><div class="mbox" id="mboxIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   LƯU TRỮ
+   ===================================================================== */
+const KEY = "phonghoc.v2";
+let db = { subjects:[], active:null, fsrs:{}, stats:{}, log:[], settings:{ newCrit:2 }, deleted:{}, sync:{}, updatedAt:0 };
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-3);
+const DAY = 86400000;
+
+/* Chuẩn hóa dữ liệu đang có trong bộ nhớ. KHÔNG đọc localStorage — tách riêng
+   khỏi load() vì gọi nhầm sau khi gộp sẽ ghi đè kết quả gộp bằng bản cũ. */
+function normalize(){
+  if(!Array.isArray(db.subjects)) db.subjects = [];
+  if(!db.fsrs) db.fsrs = {}; if(!db.stats) db.stats = {}; if(!Array.isArray(db.log)) db.log = [];
+  if(!db.settings) db.settings = { newCrit:2 };
+  if(!(db.settings.newCrit >= 1)) db.settings.newCrit = 2;
+  if(!db.settings.read) db.settings.read = { size:"m", font:"lexend", theme:"light" };
+  /* Chuyển một lần sang Lexend cho máy đã có thiết lập từ trước. Chỉ chạy
+     đúng một lần — sau này bạn tự chọn kiểu nào thì app giữ nguyên kiểu đó. */
+  if(!db.settings.fontV2){ db.settings.read.font = "lexend"; db.settings.fontV2 = 1; }
+  if(!db.deleted || typeof db.deleted !== "object") db.deleted = {};
+  if(!db.sync || typeof db.sync !== "object") db.sync = {};
+  db.subjects.forEach(s => {
+    if(!Array.isArray(s.lessons)) s.lessons = [];
+    if(!s.mode) s.mode = s.examDate ? "exam" : "soon";
+    if(!s.at) s.at = Date.now();
+    s.lessons.forEach(l => { if(!Array.isArray(l.q)) l.q = []; if(!l.at) l.at = Date.now();
+      l.q.forEach(q => { if(!q.at) q.at = Date.now(); }); });
+  });
+  db.log.forEach(x => { if(!x.id) x.id = uid(); });
+  if(!db.active || !db.subjects.some(s => s.id === db.active)) db.active = db.subjects.length ? db.subjects[0].id : null;
+}
+/* =====================================================================
+   KHO DỮ LIỆU
+   localStorage chỉ chứa được khoảng 5 MB và Safari trên iPhone còn chặt
+   hơn — với vài trăm câu kèm giải thích là đầy, lúc đó ghi hỏng lặng lẽ
+   và mất kết quả phiên học. IndexedDB chứa được gấp hàng chục lần nên
+   dùng làm kho chính; localStorage vẫn ghi song song để dữ liệu cũ và
+   các bản app cũ đọc được. Khi nạp thì lấy bản MỚI HƠN giữa hai kho.
+   ===================================================================== */
+/* Hạn mức THẬT của trình duyệt, thay vì con số tôi đoán bừa. Trên iPad
+   Safari thường cho hàng trăm MB tới vài GB; Chrome trên máy tính còn
+   rộng hơn. Cũng xin luôn chế độ "giữ lâu dài" để trình duyệt không dọn
+   dữ liệu khi máy hết chỗ.                                              */
+let quotaInfo = null;
+async function checkQuota(){
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      const already = navigator.storage.persisted ? await navigator.storage.persisted() : false;
+      if(!already) await navigator.storage.persist();
+    }
+    if(navigator.storage && navigator.storage.estimate){
+      const e = await navigator.storage.estimate();
+      quotaInfo = { used:e.usage||0, quota:e.quota||0 };
+    }
+  }catch(err){ quotaInfo = null; }
+  return quotaInfo;
+}
+function fmtMB(b){ return b >= 1073741824 ? (b/1073741824).toFixed(1)+" GB" : Math.round(b/1048576)+" MB"; }
+
+const IDB_NAME = "phonghoc-db", IDB_STORE = "kv";
+/* KHO ẢNH TÁCH RIÊNG.
+   Trước đây ảnh nằm chung một khối với tiến độ học. Mỗi câu trả lời xong
+   là app phải đóng gói lại TOÀN BỘ khối đó — với 38 MB ảnh thì iPad ghi
+   hỏng, và tiến độ mất theo. Đó chính là gốc của những lần mất bài.
+   Giờ ảnh nằm ở một bản ghi riêng: phần tiến độ chỉ còn vài trăm KB và
+   ghi được trong mọi hoàn cảnh; ảnh chỉ ghi lại khi ảnh thật sự đổi.   */
+const IDB_IMG_KEY_SUFFIX = ".imgs";
+let IMGS = {};                 // { qid: { imgQ:[...], imgA:[...] } }
+let imgsDirty = false;
+function imgOf(qid){ return IMGS[qid] || null; }
+function idbOpen(){
+  return new Promise((res, rej) => {
+    if(!window.indexedDB) return rej(new Error("Máy không hỗ trợ IndexedDB"));
+    let rq;
+    try{ rq = indexedDB.open(IDB_NAME, 1); }catch(e){ return rej(e); }
+    rq.onupgradeneeded = () => { const d = rq.result; if(!d.objectStoreNames.contains(IDB_STORE)) d.createObjectStore(IDB_STORE); };
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror  = () => rej(rq.error || new Error("Không mở được IndexedDB"));
+    rq.onblocked = () => rej(new Error("IndexedDB đang bị khóa"));
+  });
+}
+function idbGet(key){
+  return idbOpen().then(d => new Promise((res, rej) => {
+    const r = d.transaction(IDB_STORE, "readonly").objectStore(IDB_STORE).get(key);
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+}
+function idbSet(key, val){
+  return idbOpen().then(d => new Promise((res, rej) => {
+    const r = d.transaction(IDB_STORE, "readwrite").objectStore(IDB_STORE).put(val, key);
+    r.onsuccess = () => res(true); r.onerror = () => rej(r.error);
+  }));
+}
+
+/* Gỡ ảnh khỏi khối dữ liệu chính, đưa vào kho ảnh riêng. Chạy cho dữ liệu
+   cũ (ảnh còn nằm trong db) — sau lần đầu là db sạch hẳn phần ảnh.      */
+function pullOutImages(d){
+  let moved = 0;
+  (d.subjects||[]).forEach(s => (s.lessons||[]).forEach(l => (l.q||[]).forEach(q => {
+    if(q.imgQ || q.imgA){
+      const r = IMGS[q.id] || {};
+      if(q.imgQ) r.imgQ = q.imgQ;
+      if(q.imgA) r.imgA = q.imgA;
+      IMGS[q.id] = r; moved++;
+      delete q.imgQ; delete q.imgA;
+    }
+  })));
+  return moved;
+}
+
+function load(){
+  let rawLS = null;
+  try{ rawLS = localStorage.getItem(KEY); }catch(e){ console.warn("Không đọc được localStorage", e); }
+  return Promise.all([
+    idbGet(KEY).catch(() => null),
+    idbGet(KEY + IDB_IMG_KEY_SUFFIX).catch(() => null)
+  ]).then(([rawDB, rawIMG]) => {
+    const parse = r => { try{ const d = JSON.parse(r); return (d && typeof d === "object") ? d : null; }catch(e){ return null; } };
+    const a = rawLS ? parse(rawLS) : null, b = rawDB ? parse(rawDB) : null;
+    let pick = null;
+    if(a && b) pick = ((b.updatedAt||0) > (a.updatedAt||0)) ? b : a;
+    else pick = a || b;
+    if(pick) db = Object.assign(db, pick);
+    IMGS = (rawIMG ? parse(rawIMG) : null) || {};
+    /* Dữ liệu cũ có ảnh nằm lẫn trong db — chuyển sang kho ảnh ngay. */
+    if(pullOutImages(db)) imgsDirty = true;
+    normalize();
+  });
+}
+
+let quotaWarnedAt = 0, imgWarnedAt = 0;
+function save(){
+  db.updatedAt = Date.now();
+  pullOutImages(db);                 // chốt chặn: ảnh không bao giờ lọt vào khối chính
+  let json;
+  try{ json = JSON.stringify(db); }
+  catch(e){ toast("Dữ liệu lỗi, không đóng gói được để lưu.", true); return; }
+
+  /* localStorage chỉ dùng làm bản dự phòng cho dữ liệu NHỎ. */
+  if(json.length < 2000000){
+    try{ localStorage.setItem(KEY, json); }catch(e){}
+  }
+
+  idbSet(KEY, json).catch(() => {
+    if(Date.now() - quotaWarnedAt < 15000) return;
+    quotaWarnedAt = Date.now();
+    toast("KHÔNG lưu được TIẾN ĐỘ vào máy (" + fmtMB(json.length) + "). Đang đẩy lên kho GitHub.", true);
+    autoLastAt = 0; if(typeof autoSync === "function") autoSync();
+  });
+
+  if(imgsDirty) saveImgs();
+}
+
+/* Ghi kho ảnh — chỉ khi ảnh thật sự đổi, và tách hẳn khỏi lượt ghi tiến độ.
+   Ảnh ghi hỏng thì chỉ mất ảnh, tiến độ học vẫn nguyên.                 */
+function saveImgs(){
+  let json;
+  try{ json = JSON.stringify(IMGS); }catch(e){ return; }
+  imgsDirty = false;
+  idbSet(KEY + IDB_IMG_KEY_SUFFIX, json).catch(() => {
+    imgsDirty = true;
+    if(Date.now() - imgWarnedAt < 30000) return;
+    imgWarnedAt = Date.now();
+    toast("Không lưu được phần ẢNH (" + fmtMB(json.length) + ") — tiến độ học vẫn an toàn. Nên bớt ảnh lại.", true);
+  });
+}
+
+const $ = s => document.querySelector(s);
+let toastT;
+function toast(m, bad){ const t = $("#toast"); t.textContent = m; t.classList.toggle("bad", !!bad); t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function shuffle(a){ const b = a.slice(); for(let i=b.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]] = [b[j],b[i]]; } return b; }
+function stripMd(s){ return String(s).replace(/\*\*/g,"").replace(/^\s*[-•]\s+/gm,"• ").trim(); }
+/* Gemini và vài mô hình khác chèn dấu trích dẫn vào giữa câu: [cite: 1],
+   [cite_start], 【3†nguồn】. Dọn trước khi đọc đề, nhưng giữ nguyên
+   [Hình: ...] vì đó là phần mô tả hình của chính đề.                     */
+function sanitize(t){
+  return String(t)
+    .replace(/\[\s*cite[^\]]*\]/gi, "")
+    .replace(/\[\s*citation[^\]]*\]/gi, "")
+    .replace(/【[^】]*】/g, "")
+    .replace(/\uFEFF/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/[ \t]{2,}/g, " ");
+}
+function subj(){ return db.subjects.find(s => s.id === db.active) || null; }
+function allItems(s){ return (s ? s.lessons : []).flatMap(l => l.q.map(q => Object.assign({ lesson:l.name, lessonId:l.id }, q))); }
+function liveItems(s){ return allItems(s).filter(q => !q.suspect); }
+
+/* =====================================================================
+   BỘ ĐỌC ĐỀ  (giữ nguyên định dạng của bản cũ)
+   ===================================================================== */
+const RE_SPLIT = /(?:^|\n)[ \t]*(?:\*\*)?Câu[ \t]+(\d+)[ \t]*(?:\*\*)?[:：.][ \t]*/;
+const RE_OPT   = /^[ \t]*(?:\*\*)?([A-Ea-e])[ \t]*[.)．、][ \t]+(.*)$/;
+const RE_INL   = /^[ \t]*(?:\*\*)?(?:ĐA|Đ\.A|Đáp\s*án|Dap\s*an|Answer|Key)[ \t]*(?:\*\*)?[:：][ \t]*(?:\*\*)?[ \t]*([A-Ea-e])\b/i;
+const RE_EXPL  = /^[ \t]*(?:\*\*)?(?:Giải\s*thích|Giai\s*thich|GT)[ \t]*(?:\*\*)?[:：][ \t]*/i;
+const RE_STOP  = /^[ \t]*(?:\*\*)?(?:CHỐT KIẾN THỨC|Chốt kiến thức)|^[ \t]*(?:---+|___+|\*\*\*+)[ \t]*$/;
+const RE_KEYS  = /^[ \t]*(?:\*\*)?(?:Ý\s*chính|Y\s*chinh|Ý\s*đúng|Từ\s*khóa|Tu\s*khoa|Keys?)[ \t]*(?:\*\*)?[:：][ \t]*/i;
+const RE_NEED  = /^[ \t]*(?:\*\*)?(?:Đạt|Dat|Cần|Can|Tối\s*thiểu)[ \t]*(?:\*\*)?[:：][ \t]*(\d+)/i;
+const RE_MODEL = /^[ \t]*(?:\*\*)?(?:Đáp\s*án\s*mẫu|Dap\s*an\s*mau|Trả\s*lời|Tra\s*loi|Đáp\s*án|Dap\s*an)[ \t]*(?:\*\*)?[:：][ \t]*/i;
+const RE_CLIN  = /^\s*(?:\*\*)?(?:Bệnh nhân|Bệnh nhi|BN)\b|\b\d{1,2}\s*tuổi\b/i;
+
+function parseMCQ(text){
+  if(!text || !text.trim()) return [];
+  const parts = text.replace(/\r/g,"").split(new RegExp(RE_SPLIT.source,"g"));
+  const out = [];
+  for(let i=1;i<parts.length;i+=2){
+    const num = parseInt(parts[i],10);
+    const stemL = [], opts = [], explL = [];
+    let mode = "stem", inl = null;
+    for(const raw of (parts[i+1]||"").split("\n")){
+      if(RE_STOP.test(raw)) break;
+      const line = raw.replace(/\s+$/,"");
+      const mi = line.match(RE_INL);
+      if(mi){ inl = mi[1].toUpperCase(); mode = "expl"; continue; }
+      if(RE_EXPL.test(line)){ mode = "expl"; explL.push(line.replace(RE_EXPL,"")); continue; }
+      if(mode !== "expl"){ const mo = line.match(RE_OPT); if(mo){ opts.push({ label:mo[1].toUpperCase(), text:stripMd(mo[2]) }); mode = "opt"; continue; } }
+      if(mode === "stem") stemL.push(line);
+      else if(mode === "opt" && line.trim() && opts.length) opts[opts.length-1].text += " " + stripMd(line);
+      else if(mode === "expl") explL.push(line);
+    }
+    const stem = stripMd(stemL.join("\n")).trim();
+    if(!stem || opts.length < 2) continue;
+    out.push({ id:uid(), kind:"mcq", num, stem, options:opts, answer:inl, explain:stripMd(explL.join("\n")), topic:"", source:"", level:"", clinical:false, suspect:false });
+  }
+  return out;
+}
+function parseMCQKey(text){
+  const map = {};
+  if(!text || !text.trim()) return map;
+  const t = text.replace(/\r/g,"");
+  const re = /(?:^|\n)[ \t]*(?:\*\*)?Câu[ \t]+(\d+)[ \t]*(?:\*\*)?[ \t]*[—–\-:][ \t]*(?:\*\*)?[ \t]*Đáp\s*án[ \t]*[:：][ \t]*(?:\*\*)?[ \t]*([A-Ea-e])\b([^\n]*)/g;
+  const hits = []; let m;
+  while((m = re.exec(t)) !== null) hits.push({ num:parseInt(m[1],10), ans:m[2].toUpperCase(), tail:m[3]||"", start:m.index, headEnd:m.index+m[0].length });
+  hits.forEach((h,i) => {
+    const body = t.slice(h.headEnd, i+1 < hits.length ? hits[i+1].start : t.length);
+    const src = /Nguồn[ \t]*[:：][ \t]*([ABC])/i.exec(h.tail);
+    const top = /Chủ\s*đề[ \t]*[:：][ \t]*([^|\n]+)/i.exec(h.tail);
+    const lev = /Độ\s*khó[ \t]*[:：][ \t]*([0-9])/i.exec(h.tail);
+    map[h.num] = { ans:h.ans, source:src?src[1].toUpperCase():"", topic:top?top[1].trim():"", level:lev?lev[1]:"", explain:stripMd(body).trim() };
+  });
+  return map;
+}
+function splitKeys(line){ return line.split(/[|;]+/).map(x=>x.trim()).filter(Boolean).map(g => g.split("/").map(x=>x.trim()).filter(Boolean)); }
+function parseSAQ(text){
+  if(!text || !text.trim()) return [];
+  const parts = text.replace(/\r/g,"").split(new RegExp(RE_SPLIT.source,"g"));
+  const out = [];
+  for(let i=1;i<parts.length;i+=2){
+    const num = parseInt(parts[i],10);
+    const stemL = [], modelL = [], explL = []; let keys = [], need = 0, mode = "stem";
+    for(const raw of (parts[i+1]||"").split("\n")){
+      if(RE_STOP.test(raw)) break;
+      const line = raw.replace(/\s+$/,"");
+      if(RE_KEYS.test(line)){ keys = keys.concat(splitKeys(line.replace(RE_KEYS,""))); mode = "after"; continue; }
+      const mn = line.match(RE_NEED); if(mn){ need = parseInt(mn[1],10); mode = "after"; continue; }
+      if(RE_MODEL.test(line)){ modelL.push(stripMd(line.replace(RE_MODEL,""))); mode = "model"; continue; }
+      if(RE_EXPL.test(line)){ explL.push(line.replace(RE_EXPL,"")); mode = "expl"; continue; }
+      if(mode === "stem") stemL.push(line); else if(mode === "model") modelL.push(line); else if(mode === "expl") explL.push(line);
+    }
+    const stem = stripMd(stemL.join("\n")).trim();
+    if(!stem) continue;
+    out.push({ id:uid(), kind:"saq", num, stem, keys, need, model:stripMd(modelL.join("\n")).trim(), explain:stripMd(explL.join("\n")).trim(), topic:"", clinical:false, suspect:false });
+  }
+  return out;
+}
+function parseSAQKey(text){
+  const map = {};
+  if(!text || !text.trim()) return map;
+  const t = text.replace(/\r/g,"");
+  const re = /(?:^|\n)[ \t]*(?:\*\*)?Câu[ \t]+(\d+)[ \t]*(?:\*\*)?[ \t]*[—–\-:][ \t]*/g;
+  const hits = []; let m;
+  while((m = re.exec(t)) !== null) hits.push({ num:parseInt(m[1],10), start:m.index, headEnd:m.index+m[0].length });
+  hits.forEach((h,i) => {
+    const block = t.slice(h.headEnd, i+1 < hits.length ? hits[i+1].start : t.length);
+    const rec = { keys:[], need:0, model:"", explain:"" }; const modelL = [], explL = []; let mode = "model";
+    block.split("\n").forEach(raw => {
+      const line = raw.replace(/\s+$/,"");
+      if(RE_KEYS.test(line)){ rec.keys = rec.keys.concat(splitKeys(line.replace(RE_KEYS,""))); mode = "after"; return; }
+      const mn = line.match(RE_NEED); if(mn){ rec.need = parseInt(mn[1],10); mode = "after"; return; }
+      if(RE_MODEL.test(line)){ modelL.push(stripMd(line.replace(RE_MODEL,""))); mode = "model"; return; }
+      if(RE_EXPL.test(line)){ explL.push(line.replace(RE_EXPL,"")); mode = "expl"; return; }
+      if(mode === "model") modelL.push(line); else if(mode === "expl") explL.push(line);
+    });
+    rec.model = stripMd(modelL.join("\n")).trim(); rec.explain = stripMd(explL.join("\n")).trim();
+    map[h.num] = rec;
+  });
+  return map;
+}
+
+/* ---- chấm tự luận rộng tay ---- */
+function norm(s){ return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim(); }
+function lev(a,b){ const m=a.length,n=b.length; if(!m)return n; if(!n)return m;
+  let p=new Array(n+1),c=new Array(n+1);
+  for(let j=0;j<=n;j++)p[j]=j;
+  for(let i=1;i<=m;i++){ c[0]=i; for(let j=1;j<=n;j++) c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1)); const t=p;p=c;c=t; }
+  return p[n];
+}
+function closeWord(w,t){ if(w===t)return true; if(t.length<4)return w===t; if(w.indexOf(t)===0||t.indexOf(w)===0)return true; return lev(w,t) <= (t.length>7?2:1); }
+function gradeSAQ(q, ans){
+  const keys = q.keys || [], an = norm(ans||""), aw = an ? an.split(" ") : [];
+  if(!keys.length) return { hits:[], matched:0, total:0, need:0, passed:false, manual:true };
+  if(!an) return { hits:keys.map(()=>false), matched:0, total:keys.length, need:q.need||1, passed:false, manual:false };
+  const hits = keys.map(g => g.some(sy => { const k = norm(sy); if(!k) return false; if(an.indexOf(k) !== -1) return true; return k.split(" ").every(t => aw.some(w => closeWord(w,t))); }));
+  const matched = hits.filter(Boolean).length;
+  const need = q.need > 0 ? Math.min(q.need, keys.length) : Math.max(1, Math.ceil(keys.length*0.6));
+  return { hits, matched, total:keys.length, need, passed:matched >= need, manual:false };
+}
+
+/* =====================================================================
+   FSRS  +  chân trời theo chế độ môn
+   ===================================================================== */
+const W = [0.4872,1.4003,3.7145,13.8206,5.1618,1.2298,0.8975,0.0310,1.6474,0.1367,1.0461,2.1072,0.0793,0.3246,1.5870,0.2272,2.8755];
+const DECAY = -0.5, FACTOR = 19/81;
+/* NGƯỠNG NHỚ MỤC TIÊU — quyết định app đưa câu ra lúc xác suất bạn còn nhớ
+   là bao nhiêu. 0,90 nghĩa là app nhắm cho bạn đúng khoảng 90% khi ôn, nên
+   phiên ôn cảm giác dễ là ĐÚNG THIẾT KẾ, không phải lỗi chọn câu.
+   Hạ ngưỡng → khoảng cách giãn dài hơn → phiên khó hơn nhưng tốn ít giờ
+   hơn cho cùng lượng kiến thức. Đây là cần gạt "dễ/khó" thật sự.        */
+/* Mỗi PHIÊN rút một ngưỡng ngẫu nhiên trong 75–85%, đặt một lần lúc mở
+   phiên rồi giữ nguyên tới hết phiên. Bạn không phải chọn gì cả.
+   Trung bình rơi vào 80%, đúng vùng mô phỏng cho kết quả tốt nhất, mà
+   lại rải khoảng cách quanh đó thay vì khoá cứng vào một số có thể sai. */
+const RET_LO = 0.75, RET_HI = 0.85;
+let retPhien = null;
+function rutRet(){ retPhien = RET_LO + Math.random()*(RET_HI - RET_LO); return retPhien; }
+function ret(){ return retPhien || (RET_LO + RET_HI)/2; }
+function pRecall(t,s){ return Math.pow(1 + FACTOR*Math.max(0,t)/Math.max(s,0.01), DECAY); }
+function interval(s){ const R = ret(); return Math.max(1, Math.round((s/FACTOR)*(Math.pow(R,1/DECAY)-1))); }
+
+/* ---------------------------------------------------------------------
+   NHIỄU NGẪU NHIÊN CHO KHOẢNG CÁCH.
+   Câu học cùng một ngày sẽ tới hạn cùng một ngày — nên phiên ôn cứ ra
+   nguyên một bài thay vì trộn nhiều bài. Càng học theo lô lớn càng nặng.
+   Rải ngẫu nhiên ±5–25% quanh khoảng cách lý thuyết sẽ phá vỡ khối đó
+   sau vài vòng, mà gần như không đổi tỷ lệ nhớ.
+   --------------------------------------------------------------------- */
+function fuzzIvl(d){
+  if(d < 3) return d;                                  // khoảng quá ngắn thì để yên
+  const pct = d < 7 ? 0.10 : d < 30 ? 0.18 : 0.25;
+  return Math.max(1, Math.round(d * (1 + (Math.random()*2 - 1) * pct)));
+}
+
+/* ---------------------------------------------------------------------
+   BÀI ĐÃ HỌC hay CHƯA.
+   Suy ra từ dữ liệu, không lưu cờ riêng: một bài coi là ĐÃ HỌC khi mọi
+   câu trắc nghiệm của nó đã được đánh ít nhất một lần. Nhờ vậy bỏ dở
+   giữa chừng vẫn tiếp được đúng chỗ, và thêm câu mới vào bài cũ thì bài
+   tự quay lại danh sách chưa học.
+   --------------------------------------------------------------------- */
+function lessonMCQ(l){ return l.q.filter(q => !q.suspect && q.kind === "mcq"); }
+function mcqLeftIn(l){ return lessonMCQ(l).filter(q => !(db.fsrs[q.id]||{}).last).length; }
+function isLearned(l){ const m = lessonMCQ(l); return m.length > 0 && mcqLeftIn(l) === 0; }
+function unlearnedLessons(s){ return (s.lessons||[]).filter(l => lessonMCQ(l).length > 0 && !isLearned(l)); }
+
+/* Sau khi học xong một bài theo lô, dàn ngày ôn đầu tiên ra một cửa sổ
+   nhiều ngày thay vì dồn hết vào cùng một hôm.                          */
+function spreadLesson(l, perDay){
+  const cards = lessonMCQ(l).map(q => db.fsrs[q.id]).filter(st => st && st.last);
+  if(cards.length <= perDay) return;
+  const days = Math.ceil(cards.length / perDay);
+  shuffle(cards).forEach((st, i) => {
+    const base = Math.round((st.due - st.last)/DAY);
+    st.due = st.last + Math.max(1, base + Math.floor(i/perDay)) * DAY;
+  });
+}
+const clampD = d => Math.min(10, Math.max(1,d));
+const initD = g => clampD(W[4] - (g-3)*W[5]);
+const nextD = (d,g) => clampD(W[7]*initD(4) + (1-W[7])*(d - W[6]*(g-3)));
+function nextS(s,d,r,g){
+  if(g === 1) return Math.max(0.01, Math.min(W[11]*Math.pow(d,-W[12])*(Math.pow(s+1,W[13])-1)*Math.exp(W[14]*(1-r)), s));
+  return Math.max(0.01, s*(1 + Math.exp(W[8])*(11-d)*Math.pow(s,-W[9])*(Math.exp(W[10]*(1-r))-1)));
+}
+function grade(qid, g){
+  const now = Date.now(); let st = db.fsrs[qid];
+  if(!st || !st.last) st = { s:W[g-1], d:initD(g), reps:1, lapses:g===1?1:0, fails:g===1?1:0, last:now };
+  else{
+    const r = pRecall((now-st.last)/DAY, st.s);
+    st.s = nextS(st.s, st.d, r, g); st.d = nextD(st.d, g);
+    st.reps = (st.reps||0)+1;
+    if(g === 1){ st.lapses = (st.lapses||0)+1; st.fails = (st.fails||0)+1; } else st.fails = 0;
+    st.last = now;
+  }
+  st.due = now + fuzzIvl(interval(st.s))*DAY;
+  db.fsrs[qid] = st;
+}
+/* Chân trời: khoảng cách tối đa cho phép, tùy chế độ môn.
+   exam — không hẹn quá ngày thi. soon — không ngủ quá 30 ngày.
+   love — cho phép tới 180 ngày.                                        */
+function horizon(s){
+  if(!s) return 30*DAY;
+  if(s.mode === "exam" && s.examDate){
+    const left = new Date(s.examDate + "T23:59:59").getTime() - Date.now();
+    return Math.max(DAY, Math.min(left - DAY, 120*DAY));
+  }
+  if(s.mode === "love") return 180*DAY;
+  return 30*DAY;
+}
+function dueAt(qid, s){
+  const st = db.fsrs[qid]; if(!st || !st.last) return 0;
+  return Math.min(st.due, st.last + horizon(s));
+}
+function recallNow(qid){ const st = db.fsrs[qid]; if(!st || !st.last) return 0; return pRecall((Date.now()-st.last)/DAY, st.s); }
+function daysToExam(s){ if(!s || s.mode !== "exam" || !s.examDate) return null; return Math.ceil((new Date(s.examDate+"T23:59:59").getTime() - Date.now())/DAY); }
+
+/* độ thuộc của một bài: trung bình xác suất nhớ, câu chưa gặp tính 0 */
+function lessonReadiness(l){
+  if(!l.q.length) return null;
+  const live = l.q.filter(q => !q.suspect);
+  if(!live.length) return null;
+  return live.reduce((a,q) => a + recallNow(q.id), 0) / live.length;
+}
+function subjReadiness(s){
+  const it = liveItems(s); if(!it.length) return 0;
+  return it.reduce((a,q) => a + recallNow(q.id), 0) / it.length;
+}
+function band(x){ return x >= .85 ? "g" : x >= .65 ? "y" : "r"; }
+
+/* mở khóa vignette: chỉ khi bài đã tương đối thuộc phần nền */
+function clinicalUnlocked(l){
+  const base = l.q.filter(q => !q.suspect && !q.clinical);
+  if(!base.length) return true;
+  const seen = base.filter(q => (db.fsrs[q.id]||{}).reps >= 1).length;
+  return seen / base.length >= 0.5;
+}
+
+/* =====================================================================
+   XÂY HÀNG ĐỢI PHIÊN HỌC
+   ===================================================================== */
+const EST = { mcq:26, saq:58 };   // giây mỗi lượt trả lời
+
+/* PHẦN NGÂN SÁCH GIỮ RIÊNG CHO CÂU MỚI.
+   Trước đây phần ôn tới hạn được xếp trước và ăn hết ngân sách phiên, nên
+   ngày nào nợ ôn nhiều thì bài vừa đọc xong không bao giờ được đánh — phiên
+   cứ xoay lại câu cũ. Nay mỗi phiên giữ lại một phần cứng cho câu mới; phần
+   ôn quá tải dời sang ngày sau. Câu tới hạn không mất đi, và trả muộn một
+   hai ngày vẫn nằm trong vùng giãn cách có lợi, trong khi việc đọc bài xong
+   mà không được truy hồi ngay thì mất hẳn.                                */
+const NEW_SHARE = 0.35;
+
+/* Tiêu chí trong phiên: câu mới và câu vừa quên phải nhớ đúng nhiều lần,
+   câu đang thuộc chỉ cần một lần. Rawson & Dunlosky: thêm lượt truy hồi ở
+   buổi đầu làm câu đó dễ nhớ hơn hẳn ở các buổi sau.                      */
+function criterionFor(it){
+  const st = db.fsrs[it.id];
+  if(!st || !st.last) return autoCrit(db.active);      // chưa gặp bao giờ, tiêu chí do app đo
+  if((st.fails||0) >= 1) return 2;                     // vừa trượt lần trước
+  return 1;
+}
+/* =====================================================================
+   THỜI GIAN THỰC CỦA TỪNG CÂU
+   Đo ngầm, không có đồng hồ nào hiện ra khi làm bài.
+
+   KHÔNG vứt bỏ số đo nào. 4 giây nghĩa là bạn đã thuộc, 4 phút nghĩa là
+   bạn đã ngồi nghĩ — cả hai đều là thông tin thật. Thứ duy nhất cần loại
+   là quãng bạn RỜI MÁY, và việc đó xử lý bằng cách dừng đồng hồ khi tab
+   bị ẩn, chứ không phải bằng cách ném số đo đi.
+
+   Luôn lấy số đo của LẦN GẦN NHẤT: câu A lần 1 ba phút, lần 2 mười giây,
+   lần 3 một phút thì con số dùng để xếp phiên là một phút.
+   ===================================================================== */
+const SEC_CAP = 600;                       // trên 10 phút thì rõ ràng không còn là suy nghĩ
+function secOf(it){
+  const st = db.fsrs[it.id];
+  const m = st && st.sec;
+  return (m > 0) ? m : EST[it.kind];
+}
+function noteTime(qid, ms){
+  const st = db.fsrs[qid]; if(!st) return;
+  const sec = Math.min(SEC_CAP, Math.max(1, Math.round(ms/1000)));
+  st.sec = sec;                             // lần gần nhất luôn thắng
+  st.secN = (st.secN || 0) + 1;             // đã đo được bao nhiêu lần
+}
+/* Chi phí một câu trong phiên.
+   Lần chạm đầu tốn đúng thời gian giải đo được. Những lần lặp lại trong
+   CÙNG phiên (do tiêu chí phải đúng nhiều lần, hoặc do trả lời sai) thì
+   nhanh hơn hẳn vì bạn vừa đọc đáp án xong — tính nhân nguyên thời gian
+   giải cho số lần là thổi phồng, khiến phiên bị ít câu một cách vô lý.  */
+function costOf(it){
+  const sec = secOf(it);
+  const lap = Math.min(sec, 15);                       // một lần nhận mặt lại
+  return sec + (criterionFor(it) - 1 + 0.3) * lap;     // 0.3 = phần trăm trả lời sai phải lặp
+}
+
+function pairedMCQ(s, item){
+  if(item.kind !== "saq" || !item.topic) return null;
+  const l = s.lessons.find(x => x.id === item.lessonId); if(!l) return null;
+  const c = l.q.find(q => q.kind === "mcq" && !q.suspect && q.topic && q.topic === item.topic);
+  return c ? Object.assign({ lesson:l.name, lessonId:l.id }, c) : null;
+}
+/* =====================================================================
+   ĐÁNH GIÁ BÀI YẾU / BÀI MẠNH
+   FSRS vẫn quyết định câu nào TỚI HẠN — phần đó không đụng vào, nên cơ
+   chế này không phá vỡ giãn cách. Cái app được quyền chọn là: khi nợ tới
+   hạn nhiều hơn sức chứa một phiên, lấy câu của bài nào trước.
+   Chia đều tăm tắp là sai, vì bài đã thuộc chiếm chỗ ngang bài đang chật
+   vật, mà ôn thêm bài đã thuộc gần như không thêm được gì.
+
+   Ba dấu hiệu yếu, đều lấy từ dữ liệu của chính bạn:
+     · độ bền thấp — FSRS còn xếp lịch ngắn cho câu của bài đó
+     · hay trượt   — số lần quên trên tổng lượt ôn
+     · giải chậm   — thời gian giải đo được, so với mức chung của môn
+   ===================================================================== */
+function subjMedSec(s){
+  const v = [];
+  (s.lessons||[]).forEach(l => (l.q||[]).forEach(q => {
+    const st = db.fsrs[q.id]; if(st && st.sec > 0) v.push(st.sec);
+  }));
+  return v.length ? median(v) : 30;
+}
+function lessonWeak(l, medSec){
+  let n = 0, sumS = 0, reps = 0, lapses = 0, sumSec = 0, secN = 0;
+  (l.q||[]).forEach(q => {
+    const st = db.fsrs[q.id]; if(!st || !st.last) return;
+    n++; sumS += Math.max(0.1, st.s || 1);
+    reps += (st.reps || 0); lapses += (st.lapses || 0);
+    if(st.sec > 0){ sumSec += st.sec; secN++; }
+  });
+  if(!n) return null;
+  const meanS = sumS / n;
+  const fragile   = 1 - Math.min(1, meanS / 21);                 // bền 21 ngày coi như đã vững
+  const lapseRate = reps ? Math.min(1, (lapses / reps) * 3) : 0.5;
+  const meanSec   = secN ? sumSec / secN : medSec;
+  const slow      = Math.max(0, Math.min(1, (meanSec / Math.max(5, medSec) - 0.7) / 1.3));
+  return { score: 0.45*fragile + 0.35*lapseRate + 0.20*slow, n, meanS, lapseRate, meanSec, secN };
+}
+/* Danh sách bài kèm điểm yếu, mạnh nhất ở cuối. */
+function weakRank(s){
+  const med = subjMedSec(s), out = [];
+  (s.lessons||[]).forEach(l => {
+    if(!isLearned(l)) return;
+    const w = lessonWeak(l, med);
+    if(w) out.push({ id:l.id, name:l.name, w });
+  });
+  return out.sort((a,b) => b.w.score - a.w.score);
+}
+
+function buildQueue(s, minutes, newLimit){
+  const now = Date.now(), budget = minutes*60;
+  const cap = (newLimit === undefined || newLimit === null) ? Infinity : newLimit;
+  let taken = 0;
+  const pool = [];
+  s.lessons.forEach((l, li) => {
+    /* Ô ÔN TẬP chỉ nhận bài ĐÃ HỌC. Bài chưa học thuộc về ô "Học bài mới",
+       không được rò sang đây — nếu không thì hai ô lại giẫm lên nhau.     */
+    if(!isLearned(l)) return;
+    const ord = li;
+    const unlocked = clinicalUnlocked(l);
+    l.q.forEach(q => {
+      if(q.suspect) return;
+      if(!usable(q)) return;                       // điện thoại: bỏ qua tự luận
+      if(q.clinical && !unlocked) return;
+      const it = Object.assign({ lesson:l.name, lessonId:l.id }, q);
+      const st = db.fsrs[q.id];
+      /* Câu mới ở đây là câu TỰ LUẬN của bài đã học (trắc nghiệm đã đánh hết
+         ở ô Học bài mới). Trộn đều giữa các bài, không xếp theo thứ tự bài. */
+      if(!st || !st.last) pool.push({ it, tier:1, key: Math.random() });
+      else if(now >= dueAt(q.id, s)) pool.push({ it, tier:0, key:recallNow(q.id) });  // tới hạn, quên nhiều lên trước
+      else pool.push({ it, tier:2, key:recallNow(q.id) });                            // chưa tới hạn
+    });
+  });
+  pool.sort((a,b) => a.tier - b.tier || a.key - b.key);
+
+  const chosen = [], usedTopic = {};
+  let spent = 0;
+
+  /* Lấy một câu vào phiên nếu chưa vượt trần thời gian `ceil`.
+     Trả về false nghĩa là hết chỗ, ngừng quét.                            */
+  function take(p, ceil, choPhepBoQua){
+    if(spent >= ceil*0.92) return false;            // đã gần kín giờ, dừng quét
+    let it = p.it;
+    // ưu tiên SAQ; nếu đã trượt SAQ này 2 lần liên tiếp thì hạ xuống bản MCQ cùng chủ đề
+    let demoted = null;
+    const st = db.fsrs[it.id];
+    if(it.kind === "saq" && st && (st.fails||0) >= 2){ const m = pairedMCQ(s, it); if(m){ demoted = it; it = m; } }
+    if(usedTopic[it.id]) return true;               // trùng câu, bỏ qua nhưng vẫn còn chỗ
+    const cost = costOf(it);
+    /* CHỈ được bỏ qua câu dài ở lượt lấp chỗ trống (câu chưa tới hạn).
+       Với câu TỚI HẠN thì không: câu mất nhiều thời gian chính là câu bạn
+       còn chật vật, bỏ nó đi là bỏ đúng thứ cần ôn nhất — và mốc 20 phút
+       vốn chỉ là con số ước lượng, vượt một câu không sao.               */
+    if(choPhepBoQua && chosen.length && spent + cost > ceil*1.08) return true;
+    usedTopic[it.id] = 1;
+    chosen.push({ it, demotedFrom:demoted, wasNew: !(db.fsrs[it.id]||{}).last });
+    spent += cost;
+    return true;
+  }
+
+  /* Lượt 1 — CÂU MỚI, tiêu trong phần ngân sách giữ riêng. Chạy TRƯỚC phần
+     ôn, nên dù hôm nay tới hạn bao nhiêu thì bài đang đọc vẫn có chỗ.     */
+  const newCeil = budget * NEW_SHARE;
+  for(const p of pool){
+    if(p.tier !== 1) continue;
+    if(taken >= cap) break;
+    const before = chosen.length;
+    if(!take(p, newCeil, false)) break;
+    if(chosen.length > before) taken++;
+  }
+  /* Lượt 2 — CÂU TỚI HẠN, CHIA THEO ĐỘ YẾU CỦA BÀI.
+     Mọi bài đều được ít nhất một suất mỗi vòng (nợ tới hạn không bị bỏ
+     quên), nhưng bài yếu được tới ba suất. Trong từng bài vẫn ưu tiên câu
+     quên nhiều nhất — đó là phần FSRS lo.                                */
+  const byLesson = new Map();
+  for(const p of pool){
+    if(p.tier !== 0) continue;
+    const k = p.it.lessonId || "?";
+    if(!byLesson.has(k)) byLesson.set(k, []);
+    byLesson.get(k).push(p);                  // pool đã sắp, nên trong nhóm cũng đúng thứ tự
+  }
+  const med = subjMedSec(s);
+  const groups = [...byLesson.entries()].map(([lid, arr]) => {
+    const l = s.lessons.find(x => x.id === lid);
+    const w = l ? lessonWeak(l, med) : null;
+    return { arr, score: w ? w.score : 0.5, quota:1 };
+  });
+  /* Xếp hạng độ yếu rồi phát suất: 1/4 yếu nhất được 3 suất mỗi vòng,
+     nhóm giữa 2 suất, còn lại 1 suất.                                    */
+  const ranked = [...groups].sort((a,b) => b.score - a.score);
+  ranked.forEach((g, i) => {
+    const r = ranked.length > 1 ? i/(ranked.length-1) : 0;   // 0 = yếu nhất
+    g.quota = r < 0.25 ? 3 : r < 0.55 ? 2 : 1;
+  });
+  shuffle(groups);                              // thứ tự bài vẫn xáo mỗi phiên
+  let more = true;
+  roundRobin:
+  while(more){
+    more = false;
+    for(const g of groups){
+      for(let k = 0; k < g.quota; k++){
+        if(!g.arr.length) break;
+        more = true;
+        if(!take(g.arr.shift(), budget, false)) break roundRobin;
+      }
+    }
+  }
+  /* Lượt 3 — CÂU MỚI còn dư, nếu phần ôn không dùng hết giờ.              */
+  for(const p of pool){
+    if(p.tier !== 1) continue;
+    if(taken >= cap) break;
+    const before = chosen.length;
+    if(!take(p, budget, false)) break;
+    if(chosen.length > before) taken++;
+  }
+  /* Lượt 4 — CÂU CHƯA TỚI HẠN, lấp chỗ trống cuối phiên, cũng chia đều theo bài. */
+  const byLesson2 = new Map();
+  for(const p of pool){
+    if(p.tier !== 2) continue;
+    const k = p.it.lessonId || "?";
+    if(!byLesson2.has(k)) byLesson2.set(k, []);
+    byLesson2.get(k).push(p);
+  }
+  const groups2 = shuffle([...byLesson2.values()]);
+  let more2 = true;
+  roundRobin2:
+  while(more2){
+    more2 = false;
+    for(const g of groups2){
+      if(!g.length) continue;
+      more2 = true;
+      if(!take(g.shift(), budget, true)) break roundRobin2;
+    }
+  }
+
+  return shuffle(chosen);
+}
+
+/* =====================================================================
+   ĐIỀU HƯỚNG
+   ===================================================================== */
+function show(v){ ["setup","home","run","done","map","bank","susp"].forEach(x => $("#v-"+x).classList.toggle("hidden", x !== v)); window.scrollTo(0,0); }
+function fillSubjSel(){
+  const sel = $("#subjSel");
+  sel.classList.toggle("hidden", db.subjects.length < 1);
+  sel.innerHTML = "";
+  db.subjects.forEach(s => { const o = document.createElement("option"); o.value = s.id; o.textContent = s.name; sel.appendChild(o); });
+  if(db.active) sel.value = db.active;
+}
+$("#subjSel").addEventListener("change", e => { db.active = e.target.value; save(); home(); });
+$("#navHome").addEventListener("click", home);
+$("#navMap").addEventListener("click", showMap);
+$("#navBank").addEventListener("click", showBank);
+
+/* =====================================================================
+   THIẾT LẬP
+   ===================================================================== */
+let draft = { name:"", mode:"soon", date:"", lessons:[] }, editingSubject = null;
+function setStep(n){
+  document.querySelectorAll(".step").forEach(b => b.setAttribute("aria-current", String(b.dataset.s === String(n))));
+  ["st1","st2","st3"].forEach((id,i) => $("#"+id).classList.toggle("hidden", i+1 !== n));
+  if(n === 3) fillLessonSel($("#impLesson"));
+}
+document.querySelectorAll(".modecard").forEach(b => b.addEventListener("click", () => {
+  draft.mode = b.dataset.m;
+  document.querySelectorAll(".modecard").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("#dateWrap").classList.toggle("hidden", draft.mode !== "exam");
+}));
+function startSetup(first){
+  draft = { name:"", mode:"soon", date:"", lessons:[] }; editingSubject = null;
+  $("#sName").value = ""; $("#sDate").value = "";
+  document.querySelectorAll(".modecard").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.m === "soon")));
+  $("#dateWrap").classList.add("hidden");
+  $("#setupTitle").textContent = first ? "Bắt đầu" : "Thêm một môn học";
+  $("#st1cancel").classList.toggle("hidden", !db.subjects.length);
+  renderRows(); setStep(1); show("setup");
+}
+$("#st1cancel").addEventListener("click", home);
+function renderRows(){
+  const box = $("#lrows"); box.innerHTML = "";
+  draft.lessons.forEach((n,i) => {
+    const r = document.createElement("div"); r.className = "lrow";
+    r.innerHTML = '<span class="ix">'+(i+1)+'</span>';
+    const inp = document.createElement("input"); inp.type = "text"; inp.value = n; inp.placeholder = "Tên bài";
+    inp.addEventListener("input", () => draft.lessons[i] = inp.value);
+    const del = document.createElement("button"); del.className = "btn ghost sm"; del.textContent = "Xóa";
+    del.addEventListener("click", () => { draft.lessons.splice(i,1); renderRows(); });
+    r.appendChild(inp); r.appendChild(del); box.appendChild(r);
+  });
+  if(!draft.lessons.length) box.innerHTML = '<p class="hint" style="margin:0">Chưa có bài nào. Bấm “Thêm bài”.</p>';
+}
+$("#addRow").addEventListener("click", () => { draft.lessons.push(""); renderRows(); const i = $("#lrows").querySelectorAll("input"); if(i.length) i[i.length-1].focus(); });
+$("#st1next").addEventListener("click", () => {
+  const n = $("#sName").value.trim();
+  if(!n){ toast("Nhập tên môn trước đã.", true); $("#sName").focus(); return; }
+  if(draft.mode === "exam" && !$("#sDate").value){ toast("Chọn ngày thi, hoặc đổi sang chế độ chưa có ngày.", true); return; }
+  draft.name = n; draft.date = $("#sDate").value;
+  renderRows(); setStep(2);
+});
+$("#st2back").addEventListener("click", () => setStep(1));
+$("#st2next").addEventListener("click", () => {
+  const names = draft.lessons.map(x => x.trim()).filter(Boolean);
+  if(!names.length){ toast("Thêm ít nhất một bài.", true); return; }
+  if(!editingSubject){
+    editingSubject = { id:uid(), name:draft.name, mode:draft.mode, examDate:draft.mode === "exam" ? draft.date : null, lessons:[], at:Date.now() };
+    db.subjects.push(editingSubject); db.active = editingSubject.id;
+  }
+  names.forEach(n => { if(!editingSubject.lessons.some(l => l.name === n)) editingSubject.lessons.push({ id:uid(), name:n, q:[], at:Date.now() }); });
+  save(); fillSubjSel(); setStep(3);
+});
+$("#st3back").addEventListener("click", () => setStep(2));
+$("#st3done").addEventListener("click", () => { if(!liveItems(subj()).length){ toast("Chưa có câu hỏi nào — dán ít nhất một bộ vào.", true); return; } home(); });
+
+function fillLessonSel(sel){
+  const s = subj(); const cur = sel.value; sel.innerHTML = "";
+  if(!s) return;
+  s.lessons.forEach(l => { const o = document.createElement("option"); o.value = l.id;
+    o.textContent = l.name + " (" + l.q.filter(q=>q.kind==="mcq").length + " MCQ · " + l.q.filter(q=>q.kind==="saq").length + " SAQ)"; sel.appendChild(o); });
+  if(cur) sel.value = cur;
+}
+function kindLabels(kind, lq, lk, ta, tk){
+  if(kind === "saq"){
+    $(lq).textContent = "Đề — câu hỏi tự luận ngắn";
+    $(lk).textContent = "Ý chính, đáp án mẫu và giải thích";
+    $(ta).placeholder = "Câu 1: Kể ba thành phần mô học của angiomyolipoma.\nÝ chính: mạch máu loạn dạng / dysmorphic vessel | cơ trơn | mô mỡ / adipocyte\nĐạt: 3\nĐáp án mẫu: ...\nGiải thích: tr. 2125.";
+    $(tk).placeholder = "Câu 1 — Đáp án mẫu: ...\nÝ chính: a | b | c\nĐạt: 2\nGiải thích: ...";
+  }else{
+    $(lq).textContent = "Đề — câu hỏi và phương án";
+    $(lk).textContent = "Đáp án và giải thích";
+    $(ta).placeholder = "Câu 1: ...\nA. ...\nB. ...\nC. ...";
+    $(tk).placeholder = "Câu 1 — Đáp án: C | Nguồn: C | Chủ đề: Bosniak | Độ khó: 1\n- Vì sao đúng: ...";
+  }
+}
+$("#impKind").addEventListener("change", e => kindLabels(e.target.value,"#lbQ","#lbK","#impQ","#impK"));
+$("#bKind").addEventListener("change", e => kindLabels(e.target.value,"#lbBQ","#lbBK","#bQ","#bK"));
+
+function importInto(lessonId, kind, qText, kText){
+  const s = subj(); if(!s) return { err:"Chưa chọn môn." };
+  const rawLen = (qText||"").length + (kText||"").length;
+  qText = sanitize(qText); kText = sanitize(kText);
+  const cleaned = rawLen - (qText.length + kText.length);
+  const l = s.lessons.find(x => x.id === lessonId); if(!l) return { err:"Chưa chọn bài." };
+  let items, noKey = 0;
+  if(kind === "saq"){
+    items = parseSAQ(qText);
+    if(!items.length) return { err:"Không tìm thấy câu nào. Mỗi câu phải bắt đầu bằng “Câu 1:”." };
+    const key = parseSAQKey(kText);
+    items.forEach(q => { const k = key[q.num];
+      if(k){ if(k.keys.length) q.keys = k.keys; if(k.need) q.need = k.need; if(k.model) q.model = k.model; if(k.explain) q.explain = k.explain; }
+      if(!q.keys.length) noKey++;
+      q.clinical = RE_CLIN.test(q.stem);
+    });
+    items.forEach(q => q.at = Date.now());
+    l.q = l.q.concat(items); s.reading = l.id; s.at = Date.now(); save();
+    return { added:items.length, noKey, cleaned };
+  }
+  items = parseMCQ(qText);
+  if(!items.length) return { err:"Không tìm thấy câu nào. Mỗi câu cần “Câu 1:” và ít nhất 2 phương án “A. …”." };
+  const key = parseMCQKey(kText);
+  let dropped = 0;
+  items.forEach(q => { const k = key[q.num];
+    if(k){ q.answer = k.ans; q.explain = k.explain || q.explain; q.source = k.source; q.topic = k.topic; q.level = k.level; }
+    if(!q.answer || !q.options.some(o => o.label === q.answer)){ q.answer = null; dropped++; }
+    q.clinical = q.source === "B" || RE_CLIN.test(q.stem);
+  });
+  const good = items.filter(q => q.answer);
+  good.forEach(q => q.at = Date.now());
+  l.q = l.q.concat(good); s.reading = l.id; s.at = Date.now(); save();
+  return { added:good.length, dropped, cleaned };
+}
+function report(r, sel){
+  const el = $(sel);
+  if(r.err){ el.innerHTML = '<span style="color:var(--no)">'+esc(r.err)+'</span>'; return; }
+  let h = "Đã thêm <b>"+r.added+"</b> câu.";
+  if(r.dropped) h += ' <span style="color:var(--amber)">Bỏ '+r.dropped+' câu vì không tìm thấy đáp án.</span>';
+  if(r.noKey) h += ' <span style="color:var(--amber)">'+r.noKey+' câu chưa khai ý chính — sẽ để bạn tự chấm.</span>';
+  if(r.cleaned > 0) h += ' <span class="muted">Đã dọn '+r.cleaned+' ký tự rác do AI chèn ([cite: …]).</span>';
+  el.innerHTML = h; toast("Đã thêm " + r.added + " câu.");
+}
+$("#doImp").addEventListener("click", () => {
+  const r = importInto($("#impLesson").value, $("#impKind").value, $("#impQ").value, $("#impK").value);
+  report(r, "#impRep");
+  if(r.added){ $("#impQ").value = ""; $("#impK").value = ""; fillLessonSel($("#impLesson")); }
+});
+
+
+/* =====================================================================
+   NHẬN DIỆN THIẾT BỊ
+
+   Điện thoại thì gõ tự luận rất cực, nên phiên trên điện thoại chỉ lấy câu
+   trắc nghiệm. Thiết lập này KHÔNG đi theo đồng bộ — nó nằm riêng trong từng
+   máy, vì máy tính và điện thoại phải giữ chế độ khác nhau.
+   ===================================================================== */
+const DEV_KEY = "phonghoc.device";
+function devMode(){ try{ return localStorage.getItem(DEV_KEY) || "auto"; }catch(e){ return "auto"; } }
+function setDevMode(v){ try{ localStorage.setItem(DEV_KEY, v); }catch(e){} }
+function detectPhone(){
+  const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  const narrow = Math.min(screen.width || 9999, screen.height || 9999) <= 820;
+  const ua = navigator.userAgentData ? !!navigator.userAgentData.mobile
+           : /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent || "");
+  return (coarse && narrow) || (ua && narrow);
+}
+function isPhone(){ const m = devMode(); return m === "phone" ? true : m === "pc" ? false : detectPhone(); }
+/* Câu có được đưa vào phiên trên máy này không */
+function usable(q){ return !(isPhone() && q.kind === "saq"); }
+
+/* ---------- Bài đang đọc ---------- */
+function readingLesson(s){ return (s.lessons || []).find(l => l.id === s.reading) || null; }
+function newLeftIn(l){ return l ? l.q.filter(q => !q.suspect && usable(q) && !(db.fsrs[q.id]||{}).last).length : 0; }
+function nextLessonWithNew(s){
+  const idx = s.lessons.findIndex(l => l.id === s.reading);
+  for(let k = 1; k <= s.lessons.length; k++){
+    const l = s.lessons[((idx < 0 ? -1 : idx) + k + s.lessons.length) % s.lessons.length];
+    if(l && newLeftIn(l) > 0) return l;
+  }
+  return null;
+}
+function setReading(s, lessonId){ s.reading = lessonId || null; s.at = Date.now(); save(); }
+
+/* =====================================================================
+   ĐO NĂNG LỰC  →  HẠN MỨC CÂU MỚI MỖI NGÀY
+
+   Không có nghiên cứu nào cho ra con số "N câu mới mỗi ngày" cho một người
+   cụ thể. Cái có bằng chứng là ba nguyên tắc, và app đo chính bạn theo
+   từng nguyên tắc đó:
+
+   (1) NGƯỠNG GHI NHỚ MỤC TIÊU. Thuật toán giãn cách hiện đại (FSRS, Anki)
+       đặt mục tiêu nhớ đúng khoảng 90% ở mỗi lần ôn. Tỷ lệ nhớ đúng thực tế
+       của bạn trên các câu ÔN LẠI chính là tín hiệu quá tải: tụt dưới ngưỡng
+       nghĩa là bạn đang nạp nhanh hơn mức não giữ được → giảm câu mới.
+   (2) NHỊP BỀN CỦA CHÍNH BẠN. Thay vì áp một mốc phút do người khác đặt,
+       app lấy trung vị thời lượng các phiên bạn thực sự làm xong.
+   (3) TỐC ĐỘ THẬT. Giây trên mỗi lượt trả lời, đo riêng cho trắc nghiệm và
+       tự luận, thay cho con số ước lượng.
+
+   Ba thứ trên gộp thành một vòng điều khiển: ngân sách thời gian trừ đi
+   phần ôn tới hạn, chia cho giá một câu mới, rồi nhân hệ số theo tỷ lệ nhớ.
+   Con số vì vậy là kết quả ĐO, không phải mặc định.                        */
+
+function dayKey(d){ const x = d || new Date(); return x.getFullYear() + "-" + String(x.getMonth()+1).padStart(2,"0") + "-" + String(x.getDate()).padStart(2,"0"); }
+function median(a){ if(!a.length) return null; const b = a.slice().sort((x,y) => x-y); const m = b.length >> 1; return b.length % 2 ? b[m] : (b[m-1]+b[m])/2; }
+
+/* Số liệu đo được từ các phiên gần đây (bỏ phiên thi thử) */
+function perf(sid){
+  const mine = db.log.filter(x => !x.exam && x.sec > 0 && (!sid || x.subjId === sid));
+  const recent = mine.slice(-10);
+  const sec = median(recent.filter(x => x.attempts > 0).map(x => x.sec / x.attempts));
+  const mins = median(recent.map(x => x.sec/60));
+  const revA = recent.reduce((a,x) => a + (x.revSeen||0), 0);
+  const revO = recent.reduce((a,x) => a + (x.revOk||0), 0);
+  return {
+    n: recent.length,
+    secPerAttempt: sec,                       // giây mỗi lượt trả lời
+    sessionMin: mins,                         // nhịp phiên bền của bạn
+    revAcc: revA >= 12 ? revO/revA : null,    // tỷ lệ nhớ khi ôn lại
+    revSeen: revA
+  };
+}
+/* Tiêu chí lặp trong phiên cũng tự điều chỉnh: nhớ kém thì siết chặt buổi
+   đầu (Rawson & Dunlosky — thêm lượt truy hồi lúc mới học giúp nhớ lâu hơn) */
+function autoCrit(sid){
+  const p = perf(sid);
+  if(p.revAcc === null) return 2;
+  if(p.revAcc < 0.80) return 3;
+  if(p.revAcc > 0.93) return 1;
+  return 2;
+}
+function newSeenToday(sid){
+  const k = dayKey();
+  return db.log.filter(x => x.day === k && x.subjId === sid).reduce((a,x) => a + (x.newSeen||0), 0);
+}
+/* Hạn mức câu mới cho hôm nay + lý do bằng chữ */
+/* 20 phút là con số GIẢ ĐỊNH, chỉ dùng để quyết định lấy bao nhiêu câu.
+   Nó KHÔNG giới hạn phiên: không có đồng hồ đếm ngược, không tự dừng.
+   Bạn ngồi bao lâu tuỳ bạn.                                             */
+const BUDGET_MIN = 20;
+
+function capacity(s){
+  const p = perf(s.id), why = [];
+  const budgetMin = BUDGET_MIN;
+  const secAtt = Math.max(8, Math.min(120, p.secPerAttempt || 30));
+  why.push("số câu gói theo mốc " + budgetMin + " phút, tính bằng thời gian giải thật của từng câu — mốc này không giới hạn phiên, bạn cứ ôn tới khi nào muốn dừng");
+
+  /* Chỉ tính trên bài ĐÃ HỌC — bài chưa học không thuộc ngân sách ô ôn tập. */
+  const learned = {};
+  (s.lessons||[]).forEach(l => { if(isLearned(l)) learned[l.id] = 1; });
+  const items = liveItems(s).filter(q => usable(q) && learned[q.lessonId]), now = Date.now();
+  const due = items.filter(q => (db.fsrs[q.id]||{}).last && now >= dueAt(q.id, s));
+  const unseen = items.filter(q => !(db.fsrs[q.id]||{}).last);
+  const crit = autoCrit(s.id);
+  /* Dùng thời gian ĐO ĐƯỢC của từng câu, không nhân bừa một con số chung.
+     Nhờ vậy phiên gồm nhiều câu khó sẽ ít câu, phiên toàn câu đã thuộc
+     sẽ nhiều câu — cả hai vẫn gói gọn trong khoảng phút bạn đặt.        */
+  const dueSec = due.reduce((a,q) => a + secOf(q)*1.15, 0);
+  const newSec = secAtt * (crit + 0.6);                   // câu mới: chưa có số đo, dùng nhịp chung
+
+  /* Ngân sách câu mới = phần giờ còn lại sau khi trừ ôn tới hạn, NHƯNG không
+     bao giờ thấp hơn phần NEW_SHARE giữ riêng. Trước đây dòng này ép hạn mức
+     về 0 mỗi khi nợ ôn kín giờ, khiến bài vừa đọc xong không bao giờ được đánh. */
+  const budgetSec  = budgetMin*60;
+  const reserveSec = budgetSec * NEW_SHARE;
+  let limit = Math.floor(Math.max(budgetSec - dueSec, reserveSec) / newSec);
+  if(dueSec > budgetSec - reserveSec)
+    why.push("phần ôn tới hạn đang quá tải nên app giữ lại " + Math.round(NEW_SHARE*100)
+           + "% phiên cho câu mới, phần ôn dư dời sang ngày sau");
+
+  let f = 1;
+  if(p.revAcc !== null){
+    if(p.revAcc < 0.75){ f = 0.6; why.push("bạn chỉ nhớ đúng " + Math.round(p.revAcc*100) + "% khi ôn lại (mục tiêu ~90%) — giảm mạnh câu mới"); }
+    else if(p.revAcc < 0.85){ f = 0.85; why.push("nhớ đúng " + Math.round(p.revAcc*100) + "% khi ôn, hơi dưới mục tiêu — giảm nhẹ"); }
+    else if(p.revAcc > 0.92){ f = 1.15; why.push("nhớ đúng " + Math.round(p.revAcc*100) + "% khi ôn — còn dư sức, tăng nhẹ"); }
+    else why.push("nhớ đúng " + Math.round(p.revAcc*100) + "% khi ôn, đúng khoảng an toàn — giữ nhịp");
+  } else why.push("chưa đủ câu ôn để đo tỷ lệ nhớ, tạm giữ nhịp thận trọng");
+
+  limit = Math.max(0, Math.min(60, Math.round(limit * f)));
+  /* Sàn cứng: còn câu chưa học thì ngày nào cũng phải có câu mới, kể cả ngày
+     nợ ôn nặng hay tỷ lệ nhớ đang kém — chỉ hạ sàn xuống chứ không về 0.   */
+  if(!unseen.length) limit = 0;                     // không còn gì để học mới
+  else {
+    const floorNew = (p.revAcc !== null && p.revAcc < 0.75) ? 2 : 4;
+    if(limit < floorNew){ limit = Math.min(floorNew, unseen.length); why.push("giữ sàn " + limit + " câu mới để bài vừa đọc không bị treo"); }
+    limit = Math.min(limit, unseen.length);
+  }
+
+  const done = newSeenToday(s.id);
+  const left = Math.max(0, limit - done);
+
+  /* Nếu có ngày thi: nói thật cần bao nhiêu câu/ngày để phủ hết */
+  let need = null;
+  const dEx = daysToExam(s);
+  if(dEx !== null && dEx > 0 && unseen.length) need = Math.ceil(unseen.length / dEx);
+
+  return { budgetMin, secAtt, crit, limit, done, left, dueCount:due.length, unseen:unseen.length, need, revAcc:p.revAcc, n:p.n, why };
+}
+/* =====================================================================
+   BẢNG THEO DÕI NHIỀU MÔN  +  ĐỀ XUẤT HÔM NAY
+   ===================================================================== */
+function snapshot(s){
+  const items = liveItems(s), total = items.length, now = Date.now();
+  let nDue = 0, nNew = 0;
+  items.forEach(q => { const st = db.fsrs[q.id];
+    if(!st || !st.last) nNew++; else if(now >= dueAt(q.id, s)) nDue++; });
+  const cp = total ? capacity(s) : null;
+  const q = total ? buildQueue(s, s.mode === "love" ? Math.min(20,cp.budgetMin) : cp.budgetMin, cp.left) : [];
+  const minutes = Math.round(q.reduce((a,c) => a + costOf(c.it), 0)/60);
+  const weak = s.lessons.filter(l => l.q.some(x => !x.suspect) && (lessonReadiness(l) || 0) < .65).length;
+  const withQ = s.lessons.filter(l => l.q.some(x => !x.suspect)).length;
+  return { s, total, nDue, nNew, ready: total ? subjReadiness(s) : 0, dEx: daysToExam(s),
+           queue:q.length, minutes, weak, withQ };
+}
+/* Điểm ưu tiên — càng cao càng nên học hôm nay. Mọi thành phần đều giải
+   thích được thành một câu chữ, để bạn tự thấy vì sao app xếp như vậy.  */
+function priority(k){
+  if(!k.queue) return { p:0, why:["không có gì tới hạn"] };
+  const why = [];
+  let p = 0;
+  const debt = k.total ? k.nDue / Math.max(8, k.total*0.12) : 0;
+  if(k.nDue){ p += Math.min(1, debt)*40; why.push(k.nDue + " câu đã tới hạn"); }
+  if(k.s.mode === "exam" && k.dEx !== null){
+    if(k.dEx > 0){
+      const press = Math.max(0, 1 - k.dEx/45);
+      p += press*45*(1 - k.ready);
+      why.push("thi còn " + k.dEx + " ngày");
+      if(k.weak){ p += Math.min(1, k.weak/Math.max(1,k.withQ))*20; why.push(k.weak + " bài dưới 65%"); }
+    } else why.push("ngày thi đã qua");
+  }
+  else if(k.s.mode === "soon"){ p += (1 - k.ready)*16; if(k.nNew) why.push(k.nNew + " câu chưa học"); }
+  else { p *= 0.35; if(k.nNew) why.push(k.nNew + " câu chưa học"); }
+  if(!why.length) why.push(k.queue + " câu sẵn sàng");
+  return { p, why };
+}
+function renderBoard(){
+  const box = $("#boardBox");
+  if(db.subjects.length < 2){ box.innerHTML = ""; return null; }
+  const snaps = db.subjects.map(snapshot);
+  snaps.forEach(k => Object.assign(k, priority(k)));
+  const ranked = snaps.slice().sort((a,b) => b.p - a.p);
+  const top = ranked[0] && ranked[0].p > 0 ? ranked[0] : null;
+
+  let h = '<h2 style="margin:30px 0 10px">Hôm nay học môn nào</h2>'
+        + '<div class="card" style="padding:6px 20px"><table class="tbl"><thead><tr>'
+        + '<th style="width:26px"></th><th>Môn</th><th style="width:105px">Nhớ</th>'
+        + '<th style="width:95px">Tới hạn</th><th style="width:110px">Phiên nay</th><th style="width:120px"></th></tr></thead><tbody>';
+  ranked.forEach((k,i) => {
+    const act = k.s.id === db.active;
+    const mt = k.s.mode === "exam" ? '<span class="mtag exam">' + (k.dEx !== null && k.dEx > 0 ? "còn " + k.dEx + " ngày" : "đã thi") + '</span>'
+             : k.s.mode === "love" ? '<span class="mtag love">học vì thích</span>' : '<span class="mtag">chưa có lịch</span>';
+    const rc = k.total ? '<span class="cell ' + band(k.ready) + '">' + Math.round(k.ready*100) + '%</span>' : '<span class="cell n">chưa có câu</span>';
+    h += '<tr class="srow' + (act ? " act" : "") + '" data-s="' + k.s.id + '">'
+       + '<td class="rank' + (i === 0 && k.p > 0 ? " top" : "") + '">' + (k.p > 0 ? (i+1) : "—") + '</td>'
+       + '<td><div class="todo"><span class="nm">' + esc(k.s.name) + '</span>' + mt + '</div>'
+       + '<div class="why">' + esc(k.why.join(" · ")) + '</div></td>'
+       + '<td>' + rc + '</td>'
+       + '<td>' + (k.nDue ? '<span class="cell ' + (k.nDue > 40 ? "r" : k.nDue > 12 ? "y" : "g") + '">' + k.nDue + ' câu</span>' : '<span class="cell n">0</span>') + '</td>'
+       + '<td class="sm">' + (k.queue ? k.queue + ' câu · ' + k.minutes + '′' : '<span class="muted">nghỉ được</span>') + '</td>'
+       + '<td>' + (act ? '<span class="sm muted">đang mở</span>' : '<button class="swap" data-go="' + k.s.id + '">Chuyển sang</button>') + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if(top && top.s.id !== db.active) h += '<div class="note" style="margin-top:10px">Hôm nay nên ưu tiên <b>' + esc(top.s.name) + '</b> — ' + esc(top.why.join(" · ")) + '. Bấm “Chuyển sang” ở dòng đầu bảng.</div>';
+  box.innerHTML = h;
+  box.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); db.active = b.dataset.go; save(); home(); }));
+  box.querySelectorAll(".srow").forEach(r => r.addEventListener("click", () => { db.active = r.dataset.s; save(); home(); }));
+  return top;
+}
+/* =====================================================================
+   TRANG CHÍNH
+   ===================================================================== */
+function home(){
+  if(!db.subjects.length){ startSetup(true); return; }
+  const s = subj(); fillSubjSel();
+  $("#hEyebrow").textContent = { exam:"Đang ôn thi", soon:"Học trước · chưa có lịch thi", love:"Học vì thích" }[s.mode];
+  $("#hTitle").textContent = s.name;
+  $("#hero").className = "hero " + s.mode;
+
+  const items = liveItems(s), nNew = items.filter(q => !(db.fsrs[q.id]||{}).last).length;
+  const nDue = items.filter(q => (db.fsrs[q.id]||{}).last && Date.now() >= dueAt(q.id, s)).length;
+  const learnedCount = (s.lessons||[]).filter(isLearned).length;
+  const dEx = daysToExam(s);
+  const ready = items.length ? subjReadiness(s) : 0;
+
+  let st = "";
+  if(s.mode === "exam" && dEx !== null) st = "Còn <b>" + dEx + "</b> ngày tới ngày thi";
+  else if(s.mode === "soon") st = "Chưa có ngày thi — giữ trạng thái <b>sẵn sàng</b>";
+  else st = "Không thi — học theo nhịp của bạn";
+  st += " · " + items.length + " câu · " + s.lessons.length + " bài";
+  $("#hStatus").innerHTML = st;
+
+  const cap = (items.length && learnedCount) ? capacity(s) : null;
+  const minutes = cap ? (s.mode === "love" ? Math.min(20, cap.budgetMin) : cap.budgetMin) : 25;
+  const q = cap ? buildQueue(s, minutes, cap.left) : [];
+  const qNew = q.filter(c => c.wasNew).length, qRev = q.length - qNew;
+  const capReached = cap && cap.left === 0 && cap.done > 0 && !nDue;
+
+  $("#goBtn").disabled = q.length === 0;
+  if(q.length){
+    $("#goBig").textContent = "Ôn tập";
+    $("#goSub").textContent = q.length + " câu · khoảng " + minutes + " phút · "
+      + (qRev ? qRev + " câu ôn" : "") + (qRev && qNew ? " + " : "") + (qNew ? qNew + " câu mới" : "");
+  }else if(capReached){
+    $("#goBig").textContent = "Ôn tập — xong rồi";
+    $("#goSub").textContent = "Phần còn lại để dành cho ngày mai — đó là chỗ giãn cách phát huy tác dụng.";
+  }else{
+    $("#goBig").textContent = "Ôn tập";
+    $("#goSub").textContent = learnedCount
+      ? "Chưa câu nào tới hạn. Nghỉ hôm nay cũng được."
+      : "Chưa có bài nào đã học. Bắt đầu từ ô bên cạnh.";
+  }
+
+  /* Ô thứ hai — HỌC BÀI MỚI */
+  const todo = unlearnedLessons(s);
+  const todoQ = todo.reduce((a,l) => a + mcqLeftIn(l), 0);
+  $("#learnBtn").disabled = todo.length === 0;
+  if(todo.length){
+    $("#learnBig").textContent = "Học bài mới";
+    $("#learnSub").textContent = todo.length + " bài chưa học · " + todoQ + " câu trắc nghiệm đang chờ";
+  }else{
+    $("#learnBig").textContent = "Hết bài mới";
+    $("#learnSub").textContent = items.length ? "Đã học hết các bài có câu hỏi. Vào Ngân hàng để thêm bài." : "Vào Ngân hàng để dán câu hỏi.";
+  }
+  /* Lối thoát: còn câu chưa học mà phiên hôm nay không có câu mới nào (hết
+     hạn mức, hoặc bài đang đọc đã hết câu) thì mở nút học thêm.            */
+  $("#goExtra").classList.toggle("hidden", !(cap && cap.unseen > 0 && qNew === 0));
+
+  const m = $("#hMeters"); m.innerHTML = "";
+  const addMeter = (lab, val, frac, cls) => {
+    const d = document.createElement("div"); d.className = "meter";
+    d.innerHTML = '<div class="lab">'+lab+'</div><div class="val">'+val+'</div><div class="bar"><i class="'+cls+'" style="width:'+Math.round(frac*100)+'%"></i></div>';
+    m.appendChild(d);
+  };
+  if(items.length){
+    addMeter(s.mode === "love" ? "Còn nhớ" : "Độ sẵn sàng", Math.round(ready*100) + "%", ready, band(ready));
+    const touched = items.filter(q => (db.fsrs[q.id]||{}).reps >= 1).length;
+    addMeter("Đã đụng tới", touched + " / " + items.length, touched/items.length, "");
+    const solid = items.filter(q => recallNow(q.id) >= .85 && ((db.fsrs[q.id]||{}).reps||0) >= 2).length;
+    addMeter("Chắc chắn", solid + " / " + items.length, solid/items.length, "g");
+  }
+
+  renderReading(s);
+
+  const wb = $("#hWhy");
+  if(cap){
+    let w = '<div class="note blue" style="margin-top:14px"><b>Hạn mức hôm nay: ' + cap.limit + ' câu mới</b>'
+          + (cap.done ? ' — đã học ' + cap.done + ', còn ' + cap.left : '')
+          + ', cộng ' + cap.dueCount + ' câu tới hạn ôn lại.'
+          + '<div style="margin-top:6px;font-size:13px;line-height:1.55">Vì sao: ' + esc(cap.why.join(" · ")) + '.'
+          + ' Mỗi câu mới phải nhớ đúng ' + cap.crit + ' lần trong phiên.</div>';
+    if(cap.need && cap.need > cap.limit) w += '<div style="margin-top:8px;font-size:13px;color:var(--no)">Để phủ hết ' + cap.unseen + ' câu chưa học trước ngày thi, cần ' + cap.need + ' câu mới mỗi ngày — cao hơn năng lực đo được (' + cap.limit + '). Hoặc kéo dài thời gian học mỗi ngày, hoặc chấp nhận bỏ bớt phần cuối.</div>';
+    /* Cho bạn thấy app đang chấm bài nào yếu — phiên ôn lấy nhiều câu của
+       những bài này hơn, thay vì chia đều cho mọi bài.                    */
+    const rk = weakRank(s);
+    if(rk.length >= 3){
+      const yeu = rk.slice(0, 3), manh = rk[rk.length-1];
+      w += '<div style="margin-top:8px;font-size:13px;line-height:1.55">Đang yếu nhất: <b>'
+         + yeu.map(x => esc(x.name)).join("</b>, <b>") + '</b>'
+         + ' — phiên ôn dành cho những bài này nhiều suất gấp ba bài đã vững (hiện là <b>'
+         + esc(manh.name) + '</b>). Chấm theo độ bền lịch FSRS, số lần quên và thời gian bạn giải.</div>';
+    }
+    w += '</div>';
+    wb.innerHTML = w;
+  } else wb.innerHTML = "";
+
+  const notes = $("#hNotes"); notes.innerHTML = "";
+  if(isPhone()){
+    const nSaq = liveItems(s).filter(q => q.kind === "saq").length;
+    if(nSaq) notes.innerHTML = '<div class="note">Máy này đang là <b>điện thoại</b> nên phiên chỉ lấy câu trắc nghiệm — ' + nSaq
+      + ' câu tự luận để dành cho máy tính. Đổi ở nút <b>Aa</b> nếu máy nhận sai.</div>';
+  }
+  if(s.mode === "exam" && dEx !== null && items.length){
+    const weak = s.lessons.filter(l => l.q.length && (lessonReadiness(l) || 0) < .65).length;
+    if(dEx <= 0) notes.innerHTML += '<div class="note">Ngày thi đã qua. Vào “Nhập / sửa ngày thi” để đổi sang chế độ khác hoặc đặt ngày mới.</div>';
+    else if(weak) notes.innerHTML += '<div class="note">Còn ' + dEx + ' ngày, <b>' + weak + '</b> bài đang dưới 65%. App sẽ tự dồn câu của các bài này vào phiên hàng ngày.</div>';
+  }
+  if(s.mode === "soon") notes.innerHTML += '<div class="note blue">Chưa có lịch thi nên app giữ khoảng cách ôn tối đa 30 ngày — đủ để bạn không rơi tự do nếu bộ môn báo thi gấp. Khi có ngày, bấm “Nhập / sửa ngày thi”, lịch sẽ tự nén lại.</div>';
+  if(s.mode === "love") notes.innerHTML += '<div class="note">Môn này không tính phủ sóng và không đếm ngược. Bỏ vài ngày không sao — app chỉ đưa lại đúng những gì bạn sắp quên.</div>';
+
+  $("#suspN").textContent = allItems(s).filter(q => q.suspect).length;
+  renderBoard();
+  renderCalib();
+  show("home");
+}
+$("#goBtn").addEventListener("click", () => {
+  const s = subj(), cap = capacity(s);
+  const mins = s.mode === "love" ? Math.min(20, cap.budgetMin) : cap.budgetMin;
+  askConfidence(() => startRun(buildQueue(s, mins, cap.left), "Ôn tập"));
+});
+$("#learnBtn").addEventListener("click", openLearnPicker);
+$("#goExtra").addEventListener("click", () => {
+  const s = subj(), cap = capacity(s);
+  if(!confirm("Hạn mức hôm nay được tính từ nhịp và tỷ lệ nhớ đo được của chính bạn. Học thêm ngoài hạn mức sẽ dồn thêm câu tới hạn vào những ngày tới. Vẫn học thêm?")) return;
+  askConfidence(() => startRun(buildQueue(s, Math.round(cap.budgetMin*0.6), 10), "Phiên thêm"));
+});
+
+function renderReading(s){
+  const box = $("#hRead");
+  const withQ = s.lessons.filter(l => l.q.some(q => !q.suspect));
+  if(withQ.length < 2){ box.innerHTML = ""; return; }
+  if(s.reading && !readingLesson(s)) s.reading = null;
+  const l = readingLesson(s), left = newLeftIn(l);
+  let h = '<div class="readrow"><span class="lab">Đang đọc</span>';
+  if(l){
+    h += '<b>' + esc(l.name) + '</b><span>· còn ' + left + ' câu mới trong bài này</span>';
+  } else {
+    h += '<span>chưa chỉ định — câu mới đang lấy theo thứ tự bài</span>';
+  }
+  h += '<span class="sp" style="flex:1"></span><button class="readbtn" id="readPick">' + (l ? "Đổi bài" : "Chọn bài") + '</button></div>';
+  const nx = l && left === 0 ? nextLessonWithNew(s) : null;
+  if(nx) h += '<div class="note" style="margin-top:10px">Bài <b>' + esc(l.name) + '</b> đã hết câu mới. Chuyển sang <b>' + esc(nx.name) + '</b>? <button class="btn ghost sm" id="readNext" style="margin-left:8px">Chuyển</button></div>';
+  box.innerHTML = h;
+  $("#readPick").addEventListener("click", () => pickReading(s));
+  if(nx) $("#readNext").addEventListener("click", () => { setReading(s, nx.id); home(); toast("Đang đọc: " + nx.name); });
+}
+function pickReading(s){
+  let h = '<h2>Bạn đang đọc bài nào?</h2><p class="sub">Câu mới sẽ lấy từ bài này trước. Câu ôn lại vẫn trộn tất cả các bài như cũ.</p>';
+  s.lessons.forEach(l => {
+    const n = newLeftIn(l), tot = l.q.filter(q => !q.suspect).length;
+    h += '<button class="pick" data-r="' + l.id + '"' + (tot ? "" : " disabled") + '><span><b>' + esc(l.name) + '</b>'
+       + '<span>' + (tot ? (n ? n + ' câu mới chưa học · ' : 'đã học hết câu mới · ') + tot + ' câu tổng' : 'chưa có câu hỏi') + '</span></span></button>';
+  });
+  h += '<div class="row" style="margin-top:12px"><button class="lk" data-r="">Bỏ đánh dấu, quay lại thứ tự bài</button><span class="sp"></span><button class="lk" data-close>Đóng</button></div>';
+  openModal(h);
+  $("#mboxIn").querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => {
+    setReading(s, b.dataset.r || null); closeModal(); home();
+    toast(b.dataset.r ? "Đang đọc: " + (readingLesson(s)||{}).name : "Đã bỏ đánh dấu bài đang đọc.");
+  }));
+}
+
+/* ---- ngày thi ---- */
+$("#btnExam").addEventListener("click", () => {
+  const s = subj();
+  openModal('<h2>Lịch thi của môn này</h2><p class="sub">' + esc(s.name) + '</p>'
+    + '<button class="pick" data-x="exam"><span><b>Đã có ngày thi</b><span>Nhập ngày bên dưới. App nén lịch để mọi bài kịp ôn.</span></span></button>'
+    + '<div class="field" id="dw" style="margin:6px 0 12px"><input type="date" id="mDate" value="' + (s.examDate||"") + '"></div>'
+    + '<button class="pick" data-x="soon"><span><b>Chưa có ngày thi</b><span>Học trước. Khoảng cách ôn tối đa 30 ngày.</span></span></button>'
+    + '<button class="pick" data-x="love"><span><b>Học vì thích, không thi</b><span>Không đếm ngược, khoảng cách kéo dài tới 180 ngày.</span></span></button>'
+    + '<div class="row" style="margin-top:12px"><span class="sp"></span><button class="lk" data-close>Đóng</button></div>');
+  $("#mboxIn").querySelectorAll("[data-x]").forEach(b => b.addEventListener("click", () => {
+    const x = b.dataset.x;
+    if(x === "exam"){
+      const d = $("#mDate").value;
+      if(!d){ toast("Chọn ngày trước đã.", true); return; }
+      s.mode = "exam"; s.examDate = d;
+    }else{ s.mode = x; s.examDate = null; }
+    save(); closeModal(); home();
+    toast(x === "exam" ? "Đã đặt ngày thi — lịch ôn được nén lại." : "Đã đổi chế độ môn.");
+  }));
+});
+
+/* ---- ôn một bài cụ thể / thi thử ---- */
+$("#btnFree").addEventListener("click", () => {
+  const s = subj();
+  const rows = s.lessons.map(l => {
+    const n = l.q.filter(q => !q.suspect && usable(q)).length;
+    return { key:noAccent(l.name), html:
+      '<button class="pick" data-l="'+l.id+'"'+(n?"":" disabled")+'><span><b>'+esc(l.name)+'</b><span>'+n+' câu</span></span></button>' };
+  });
+  let h = '<h2>Ôn một bài cụ thể</h2><p class="sub">Dùng khi bạn vừa đọc xong một bài và muốn đánh ngay. Phiên hàng ngày vẫn là lối chính.</p>'
+        + '<input type="text" id="frFind" placeholder="Tìm tên bài… (gõ không dấu cũng được)" style="width:100%;margin-bottom:10px" autocomplete="off">'
+        + '<div id="frList"></div>'
+        + '<div class="row" style="margin-top:12px"><span class="sp"></span><button class="lk" data-close>Đóng</button></div>';
+  openModal(h);
+  const frList = $("#frList"), frFind = $("#frFind");
+  function frDraw(){
+    const qy = noAccent(frFind.value.trim());
+    const hit = qy ? rows.filter(r => r.key.includes(qy)) : rows;
+    frList.innerHTML = hit.length ? hit.map(r => r.html).join("")
+      : '<p class="sub" style="padding:14px 0">Không có bài nào khớp.</p>';
+    bindPick();
+  }
+  frFind.addEventListener("input", frDraw);
+  function bindPick(){
+  $("#mboxIn").querySelectorAll("[data-l]").forEach(b => b.addEventListener("click", () => {
+    const l = s.lessons.find(x => x.id === b.dataset.l);
+    const unlocked = clinicalUnlocked(l);
+    let pool = l.q.filter(q => !q.suspect && usable(q) && (!q.clinical || unlocked)).map(q => ({ it:Object.assign({ lesson:l.name, lessonId:l.id }, q), demotedFrom:null }));
+    /* Vừa đọc xong thì câu chưa gặp bao giờ phải lên trước, rồi mới tới câu cũ. */
+    const fresh = shuffle(pool.filter(c => !(db.fsrs[c.it.id]||{}).last));
+    const seen  = shuffle(pool.filter(c =>  (db.fsrs[c.it.id]||{}).last));
+    pool = fresh.concat(seen);
+    closeModal();
+    askConfidence(() => startRun(shuffle(pool.slice(0,20)), "Ôn bài — " + l.name), l.id);
+  }));
+  }
+  frDraw();
+  if(!isPhone()) setTimeout(() => frFind.focus(), 40);
+});
+$("#btnMock").addEventListener("click", () => {
+  const s = subj();
+  const pool = liveItems(s).filter(q => q.kind === "mcq");
+  if(pool.length < 20){ toast("Cần ít nhất 20 câu trắc nghiệm.", true); return; }
+  if(pool.length < 100 && !confirm("Chỉ có " + pool.length + " câu trắc nghiệm. Thi thử với từng đó?")) return;
+  startRun(shuffle(pool).slice(0,100).map(q => ({ it:q, demotedFrom:null })), "Thi thử", { exam:true, minutes:120 });
+});
+
+/* =====================================================================
+   HỎI MỨC TỰ TIN — TRƯỚC KHI LÀM
+   ===================================================================== */
+const CONF = { sure:{ label:"Chắc chắn", guess:.92 }, unsure:{ label:"Không chắc chắn", guess:.75 }, weak:{ label:"Hoàn toàn yếu", guess:.5 } };
+let pending = null;
+function askConfidence(go, lessonId){
+  openModal('<h2>Trước khi bắt đầu</h2><p class="sub">Bạn nghĩ mình sẽ trả lời đúng ngay lần đầu ở mức nào?</p>'
+    + '<button class="pick" data-v="sure"><span><b>Chắc chắn</b><span>Nắm vững, chắc đúng phần lớn.</span></span></button>'
+    + '<button class="pick" data-v="unsure"><span><b>Không chắc chắn</b><span>Làm được nhưng còn phải nghĩ.</span></span></button>'
+    + '<button class="pick" data-v="weak"><span><b>Hoàn toàn yếu</b><span>Chưa nắm, cần học lại.</span></span></button>'
+    + '<div class="row" style="margin-top:12px"><span class="sp"></span><button class="lk" data-skip>Bỏ qua</button></div>');
+  $("#mboxIn").querySelectorAll("[data-v]").forEach(b => b.addEventListener("click", () => { pending = { conf:b.dataset.v, lessonId:lessonId||null }; closeModal(); go(); }));
+  $("#mboxIn").querySelector("[data-skip]").addEventListener("click", () => { pending = { conf:null, lessonId:lessonId||null }; closeModal(); go(); });
+}
+function renderCalib(){
+  const box = $("#calibBox"); const log = db.log.filter(x => x.conf).slice(-8);
+  if(log.length < 2){ box.innerHTML = ""; return; }
+  let over = 0;
+  let h = '<h2 style="margin:28px 0 10px">Bạn tự đoán so với thực tế</h2><div class="card" style="padding:6px 20px"><table class="tbl"><thead><tr><th>Phiên</th><th style="width:150px">Bạn đoán</th><th style="width:110px">Thực tế</th><th style="width:130px">Lệch</th></tr></thead><tbody>';
+  log.slice().reverse().forEach(x => {
+    const g = CONF[x.conf].guess, diff = Math.round((g - x.acc)*100);
+    if(diff >= 10) over++;
+    const cls = Math.abs(diff) < 10 ? "g" : diff > 0 ? "r" : "y";
+    h += '<tr><td class="sm">'+esc(x.label || "Phiên học")+'<br><span class="muted">'+x.date+'</span></td><td><span class="cell '+({sure:"g",unsure:"y",weak:"r"}[x.conf])+'">'+CONF[x.conf].label+'</span></td>'
+       + '<td><b>'+Math.round(x.acc*100)+'%</b></td><td><span class="cell '+cls+'">'+(diff>0?"cao hơn "+diff:diff<0?"thấp hơn "+(-diff):"khớp")+(diff?" điểm":"")+'</span></td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if(over >= 2) h += '<div class="note" style="margin-top:10px">Bạn đã <b>'+over+'</b> lần đánh giá mình cao hơn thực tế. Khi cảm giác và con số đá nhau, tin con số.</div>';
+  box.innerHTML = h;
+}
+
+/* =====================================================================
+   PHIÊN HỌC — successive relearning
+   ===================================================================== */
+let R = null, rTick = null;
+function startRun(cards, label, opts){
+  opts = opts || {};
+  if(!cards.length){ toast("Không có câu nào.", true); return; }
+  R = {
+    label, exam:!!opts.exam, learn:!!opts.learn, minutes:opts.minutes||0,
+    queue: cards.map(c => ({ it:c.it, demotedFrom:c.demotedFrom, wasNew: c.wasNew !== undefined ? c.wasNew : !(db.fsrs[c.it.id]||{}).last,
+                             need: (opts.exam || opts.learn) ? 1 : criterionFor(c.it), got:0, tries:0, firstOk:null })),
+    total: cards.length, doneList: [], attempts: 0, answered:false, left: (opts.minutes||0)*60,
+    activeMs: 0, qStart: 0, startedAt: Date.now(),
+    conf: pending ? pending.conf : null, lessonId: (pending && pending.lessonId) || opts.lessonId || null
+  };
+  pending = null;
+  /* Rút ngưỡng nhớ mục tiêu cho PHIÊN NÀY, một lần, giữ nguyên tới hết
+     phiên. Thi thử thì không cần vì nó không chấm điểm FSRS.             */
+  if(!opts.exam) rutRet(); else retPhien = null;
+  R.ret = retPhien;
+  $("#rTimer").classList.toggle("hidden", !opts.minutes);
+  if(opts.minutes){
+    tickShow();
+    rTick = setInterval(() => { R.left--; tickShow(); if(R.left <= 0){ clearInterval(rTick); rTick = null; finishRun(true); } }, 1000);
+  }
+  $("#rHint").textContent = R.exam ? "Chế độ thi thử: không có phản hồi giữa chừng." : "Câu nào sai sẽ quay lại cuối hàng đợi cho tới khi bạn trả lời đúng.";
+  renderCard(); show("run");
+}
+function tickShow(){ const m = Math.floor(Math.max(0,R.left)/60), s = Math.max(0,R.left)%60;
+  const e = $("#rTimer"); e.textContent = String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); e.classList.toggle("warn", R.left <= 300); }
+
+function renderCard(){
+  const c = R.queue[0];
+  $("#rProg").textContent = R.doneList.length + " / " + R.total + " câu xong";
+  $("#rAtt").textContent = R.attempts + " lượt";
+  $("#rBar").style.width = Math.round(R.doneList.length/R.total*100) + "%";
+  const it = c.it;
+  let meta = '<span>'+esc(it.lesson)+'</span>';
+  if(it.kind === "saq") meta += '<span class="tagx saq">tự luận</span>';
+  if(it.clinical) meta += '<span class="tagx vig">tình huống</span>';
+  if(c.demotedFrom) meta += '<span class="tagx">bản dễ hơn</span>';
+  if(c.got > 0 && c.need > 1) meta += '<span class="tagx crit">đúng '+c.got+'/'+c.need+'</span>';
+  if(c.tries > 0) meta += '<span class="tagx">lần '+(c.tries+1)+'</span>';
+  $("#rMeta").innerHTML = meta;
+  $("#rStem").textContent = it.stem;
+  renderShots($("#rImgQ"), it.id, "imgQ", false);   // hình câu hỏi, chưa cho sửa khi chưa trả lời
+  $("#rFb").innerHTML = ""; R.answered = false; R.qStart = Date.now(); R.qPaused = 0; R.hidAt = 0;
+
+  const opts = $("#rOpts"), saq = $("#rSaq"), acts = $("#rActs");
+  acts.innerHTML = "";
+  if(it.kind === "mcq"){
+    saq.classList.add("hidden"); opts.classList.remove("hidden"); opts.innerHTML = "";
+    /* Giữ NGUYÊN thứ tự đáp án như trong đề. Nhãn cũng lấy từ đề (A/B/C/D)
+       chứ không đánh lại theo vị trí, để khớp với bản gốc bạn đối chiếu.  */
+    const shown = it.options.slice();
+    shown.forEach((o,i) => {
+      const b = document.createElement("button"); b.className = "opt"; b.type = "button";
+      b.innerHTML = '<span class="k">'+esc(o.label)+'</span><span>'+esc(o.text)+'</span>';
+      b.addEventListener("click", () => answerMCQ(o.label, shown));
+      opts.appendChild(b);
+    });
+  }else{
+    opts.classList.add("hidden"); saq.classList.remove("hidden");
+    $("#rInput").value = ""; $("#rInput").disabled = false;
+    const b = document.createElement("button"); b.className = "btn"; b.textContent = "Kiểm tra";
+    b.addEventListener("click", answerSAQ); acts.appendChild(b);
+    setTimeout(() => $("#rInput").focus(), 30);
+  }
+  const sk = document.createElement("button"); sk.className = "lk"; sk.textContent = "Câu này sai — đưa vào hộp nghi ngờ";
+  sk.addEventListener("click", () => suspectCurrent()); acts.appendChild(sk);
+}
+/* =====================================================================
+   SỬA CÂU NGAY TRONG LÚC LÀM BÀI
+   Ngân hàng do máy sinh ra nên có câu sai đáp án. Trước đây chỉ có cách
+   đưa vào hộp nghi ngờ rồi câu đó biến mất — mất luôn cả nội dung dùng
+   được. Giờ sửa tại chỗ, và quan trọng nhất: nếu bạn chọn đúng mà máy
+   chấm sai do khóa đáp án sai, app CHẤM LẠI lượt vừa rồi. Không thì FSRS
+   ghi nhận một lần trượt oan và lịch ôn của câu đó lệch theo.
+   ===================================================================== */
+function openFixCard(){
+  const c = R && R.queue[0]; if(!c) return;
+  const q = origQ(c.it.id);
+  if(!q){ toast("Câu này không có bản gốc trong ngân hàng để sửa.", true); return; }
+  const isMCQ = q.kind === "mcq";
+
+  let h = '<h2>Sửa câu này</h2><p class="sub">Sửa xong lưu thẳng vào ngân hàng và đẩy lên kho đồng bộ.</p>';
+  h += '<div class="field"><label for="fxStem">Đề bài</label>'
+     + '<textarea id="fxStem" style="min-height:80px">' + esc(q.stem || "") + '</textarea></div>';
+
+  if(isMCQ){
+    h += '<div class="field"><label>Các lựa chọn — chấm vào ô tròn của ĐÁP ÁN ĐÚNG</label><div id="fxOpts">';
+    (q.options||[]).forEach((o, i) => {
+      h += '<div class="row" style="align-items:center;gap:8px;margin-bottom:6px">'
+         + '<input type="radio" name="fxKey" value="' + esc(o.label) + '" id="fxk'+i+'"'
+         + (o.label === q.answer ? " checked" : "") + ' style="flex:0 0 auto;width:18px;height:18px">'
+         + '<label for="fxk'+i+'" style="flex:0 0 auto;font-family:var(--mono);font-weight:700;margin:0">' + esc(o.label) + '</label>'
+         + '<input type="text" data-opt="' + i + '" value="' + esc(o.text) + '" style="flex:1;min-width:120px">'
+         + '</div>';
+    });
+    h += '</div></div>';
+  }
+
+  h += '<div class="field"><label for="fxExp">Giải thích</label>'
+     + '<textarea id="fxExp" style="min-height:70px">' + esc(q.explain || "") + '</textarea></div>'
+     + '<div class="row" style="margin-top:10px"><button class="btn" id="fxSave">Lưu sửa đổi</button>'
+     + '<span class="sp"></span><button class="lk" data-close>Hủy</button></div>';
+
+  openModal(h);
+  $("#fxSave").addEventListener("click", () => {
+    const cur = origQ(c.it.id); if(!cur){ closeModal(); return; }
+    const stem = $("#fxStem").value.trim();
+    if(!stem){ toast("Đề bài không được để trống.", true); return; }
+    cur.stem = stem;
+    cur.explain = $("#fxExp").value.trim();
+
+    let keyChanged = false;
+    if(isMCQ){
+      $("#mboxIn").querySelectorAll("[data-opt]").forEach(inp => {
+        const o = cur.options[+inp.dataset.opt];
+        if(o) o.text = inp.value.trim();
+      });
+      const picked = $("#mboxIn").querySelector('input[name=fxKey]:checked');
+      if(picked && picked.value !== cur.answer){ cur.answer = picked.value; keyChanged = true; }
+    }
+    cur.at = Date.now();
+    save();
+
+    /* Đồng bộ lại bản đang hiển thị trên màn hình với bản gốc vừa sửa. */
+    c.it.stem = cur.stem; c.it.explain = cur.explain; c.it.answer = cur.answer;
+    if(isMCQ && cur.options) c.it.options = cur.options.map(o => ({ label:o.label, text:o.text }));
+
+    closeModal();
+    autoLastAt = 0; if(typeof autoSync === "function") autoSync();
+
+    /* CHẤM LẠI nếu khóa đáp án đổi và bạn đã trả lời câu này. */
+    if(keyChanged && c.picked != null){
+      const nowOk = (c.picked === cur.answer);
+      if(c.tries === 1) c.firstOk = nowOk;      // chỉ lượt ĐẦU mới quyết định điểm FSRS
+      regradeView(c, nowOk);
+      toast(nowOk
+        ? "Đã sửa đáp án đúng thành " + cur.answer + " — lượt vừa rồi được chấm lại là ĐÚNG."
+        : "Đã sửa đáp án đúng thành " + cur.answer + " — lượt vừa rồi vẫn tính là sai.");
+    }else{
+      $("#rStem").textContent = c.it.stem;
+      toast("Đã lưu sửa đổi.");
+    }
+  });
+}
+
+/* Vẽ lại đề, tô lại các lựa chọn và phần phản hồi theo khóa đáp án mới. */
+function regradeView(c, nowOk){
+  $("#rStem").textContent = c.it.stem;
+  const nodes = $("#rOpts").children, shown = c.shown || c.it.options || [];
+  shown.forEach((o, i) => {
+    const n = nodes[i]; if(!n) return;
+    n.classList.remove("correct","wrong");
+    // nhãn có thể đã đổi chữ, lấy lại từ bản mới
+    const fresh = (c.it.options||[])[i];
+    if(fresh) n.innerHTML = '<span class="k">'+esc(fresh.label)+'</span><span>'+esc(fresh.text)+'</span>';
+    const lab = fresh ? fresh.label : o.label;
+    if(lab === c.it.answer) n.classList.add("correct");
+    else if(lab === c.picked) n.classList.add("wrong");
+  });
+  showFb(nowOk, c.it.explain || "");
+  addNext(nowOk);
+}
+
+function answerMCQ(label, shown){
+  if(R.answered) return;
+  const c = R.queue[0], ok = label === c.it.answer;
+  R.answered = true; R.attempts++; c.tries++;
+  c.picked = label; c.shown = shown;      // giữ lại để chấm lại nếu bạn sửa đáp án đúng
+  if(c.firstOk === null) c.firstOk = ok;
+  const nodes = $("#rOpts").children;
+  shown.forEach((o,i) => {
+    nodes[i].disabled = true;
+    if(o.label === c.it.answer) nodes[i].classList.add("correct");
+    else if(o.label === label) nodes[i].classList.add("wrong");
+  });
+  if(R.exam){ advance(ok); return; }
+  showFb(ok, c.it.explain || "");
+  addNext(ok);
+}
+function answerSAQ(){
+  if(R.answered) return;
+  const c = R.queue[0], txt = $("#rInput").value;
+  const res = gradeSAQ(c.it, txt);
+  let ok = res.passed;
+  R.answered = true; R.attempts++; c.tries++;
+  if(c.firstOk === null) c.firstOk = ok;
+  $("#rInput").disabled = true;
+  let body = "";
+  if(res.total){
+    body += '<div class="keylist">' + c.it.keys.map((g,i) => '<span class="kc '+(res.hits[i]?"hit":"miss")+'">'+(res.hits[i]?"✓ ":"✗ ")+esc(g[0])+'</span>').join("") + '</div>';
+    body += '<div class="sm muted">Khớp '+res.matched+'/'+res.total+' ý · cần '+res.need+' ý.</div>';
+  }
+  if(c.it.model) body += '<div class="model"><span class="lb">Đáp án mẫu</span>'+esc(c.it.model)+'</div>';
+  if(c.it.explain) body += '<div style="margin-top:9px">'+esc(c.it.explain)+'</div>';
+  showFb(ok, body, true);
+  const ov = document.createElement("div"); ov.className = "row"; ov.style.marginTop = "10px";
+  ov.innerHTML = '<span class="sm muted">Máy chấm chưa sát ý bạn viết?</span>';
+  const y = document.createElement("button"); y.className = "btn ghost sm"; y.textContent = "Tính là đúng";
+  const n = document.createElement("button"); n.className = "btn ghost sm"; n.textContent = "Tính là sai";
+  y.addEventListener("click", () => { c.firstOk = c.tries === 1 ? true : c.firstOk; redoNext(true); });
+  n.addEventListener("click", () => { c.firstOk = c.tries === 1 ? false : c.firstOk; redoNext(false); });
+  ov.appendChild(y); ov.appendChild(n); $("#rFb").appendChild(ov);
+  addNext(ok);
+}
+/* =====================================================================
+   HÌNH GẮN VÀO CÂU HỎI / ĐÁP ÁN
+   Hình được thu nhỏ rồi lưu thẳng vào chính đối tượng câu hỏi (q.imgQ /
+   q.imgA), nên nó đi theo mọi đường dữ liệu có sẵn: lưu cục bộ, xuất sao
+   lưu, và đẩy lên kho đồng bộ. Không có kho ảnh riêng nào để thất lạc.
+   Bắt buộc phải nén: ảnh điện thoại 4 MB mà lưu nguyên thì vài tấm là
+   đầy bộ nhớ trình duyệt và hỏng luôn đồng bộ.
+   ===================================================================== */
+const IMG_MAX_PX = 1000, IMG_Q = 0.7, IMG_PER_SLOT = 3;
+
+/* Tìm đối tượng câu hỏi GỐC trong db. Thứ đang hiển thị chỉ là bản sao
+   nông — sửa vào đó thì lưu xong là mất.                                */
+function origQ(qid){
+  for(const s of (db.subjects||[])) for(const l of (s.lessons||[])){
+    const q = (l.q||[]).find(x => x.id === qid);
+    if(q) return q;
+  }
+  return null;
+}
+
+function shrinkImage(file){
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error("Không đọc được tệp"));
+    fr.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error("Tệp này không phải ảnh đọc được"));
+      im.onload = () => {
+        let w = im.naturalWidth, h = im.naturalHeight;
+        const m = Math.max(w, h);
+        if(!m) return rej(new Error("Ảnh rỗng"));
+        if(m > IMG_MAX_PX){ w = Math.round(w*IMG_MAX_PX/m); h = Math.round(h*IMG_MAX_PX/m); }
+        const cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        const cx = cv.getContext("2d");
+        cx.fillStyle = "#fff"; cx.fillRect(0,0,w,h);   // nền trắng cho PNG trong suốt
+        cx.drawImage(im, 0, 0, w, h);
+        res(cv.toDataURL("image/jpeg", IMG_Q));
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* Tổng dung lượng ảnh đang giữ, để cảnh báo trước khi đầy bộ nhớ. */
+function imgBytes(){
+  let n = 0;
+  Object.keys(IMGS).forEach(id => ["imgQ","imgA"].forEach(k => (IMGS[id][k]||[]).forEach(d => { n += d.length; })));
+  return n;
+}
+
+function pickImage(qid, slot, after){
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*"; inp.style.display = "none";
+  document.body.appendChild(inp);
+  inp.addEventListener("change", async () => {
+    const f = inp.files && inp.files[0];
+    inp.remove();
+    if(!f) return;
+    try{
+      toast("Đang xử lý ảnh…");
+      const data = await shrinkImage(f);
+      if(!origQ(qid)){ toast("Không tìm thấy câu hỏi gốc để gắn hình.", true); return; }
+      const rec = IMGS[qid] || (IMGS[qid] = {});
+      if(!Array.isArray(rec[slot])) rec[slot] = [];
+      if(rec[slot].length >= IMG_PER_SLOT){ toast("Mỗi phần chỉ giữ tối đa " + IMG_PER_SLOT + " hình.", true); return; }
+      rec[slot].push(data);
+      imgsDirty = true;
+      save();
+      /* Báo theo hạn mức THẬT của máy, chỉ lên tiếng khi đã dùng quá 80%. */
+      const info = await checkQuota();
+      let extra = "";
+      if(info && info.quota){
+        const pct = info.used / info.quota;
+        if(pct > 0.8) extra = " · đã dùng " + fmtMB(info.used) + " / " + fmtMB(info.quota) + " — sắp đầy thật";
+        else if(imgBytes() > 20000000) extra = " · ảnh đang chiếm " + fmtMB(imgBytes()) + ", còn thoải mái";
+      }
+      toast("Đã thêm hình" + extra);
+      autoLastAt = 0; autoSync();
+      if(after) after();
+    }catch(e){ toast(e.message || "Không thêm được hình.", true); }
+  });
+  inp.click();
+}
+
+function lightbox(src){
+  const d = document.createElement("div"); d.id = "lightbox";
+  const im = document.createElement("img"); im.src = src; d.appendChild(im);
+  const off = () => { d.remove(); document.removeEventListener("keydown", key); };
+  function key(e){ if(e.key === "Escape") off(); }
+  d.addEventListener("click", off);
+  document.addEventListener("keydown", key);
+  document.body.appendChild(d);
+}
+
+/* Vẽ dãy hình của một phần (câu hỏi hoặc đáp án). */
+function renderShots(box, qid, slot, editable, after){
+  if(!box) return;
+  box.innerHTML = "";
+  const rec = imgOf(qid); if(!rec) return;
+  (rec[slot]||[]).forEach((data, i) => {
+    const w = document.createElement("div"); w.className = "shot";
+    const im = document.createElement("img"); im.src = data; im.alt = "";
+    im.addEventListener("click", () => lightbox(data));
+    w.appendChild(im);
+    if(editable){
+      const rm = document.createElement("button");
+      rm.className = "rm"; rm.type = "button"; rm.textContent = "\u00D7"; rm.title = "Xóa hình này";
+      rm.addEventListener("click", () => {
+        if(!confirm("Xóa hình này?")) return;
+        const cur = IMGS[qid]; if(!cur || !cur[slot]) return;
+        cur[slot].splice(i, 1);
+        if(!cur[slot].length) delete cur[slot];
+        if(!cur.imgQ && !cur.imgA) delete IMGS[qid];
+        imgsDirty = true; save();
+        autoLastAt = 0; autoSync();
+        if(after) after();
+      });
+      w.appendChild(rm);
+    }
+    box.appendChild(w);
+  });
+}
+
+/* Khối "Thêm hình vào:", hiện ở phần phản hồi sau khi đã trả lời. */
+function addImgTools(){
+  const c = R && R.queue[0]; if(!c) return;
+  const qid = c.it.id;
+  if(!origQ(qid)) return;                 // câu tạm, không có chỗ lưu ảnh
+
+  const shotsA = document.createElement("div");
+  shotsA.className = "imgrow"; shotsA.style.width = "100%"; shotsA.style.marginTop = "12px";
+  const drawA = () => renderShots(shotsA, qid, "imgA", true, drawA);
+  const drawQ = () => renderShots($("#rImgQ"), qid, "imgQ", true, drawQ);
+  drawA();
+
+  const wrap = document.createElement("div"); wrap.className = "imgtools";
+  const lbl = document.createElement("span"); lbl.className = "lbl"; lbl.textContent = "Thêm hình vào:";
+  const bq = document.createElement("button");
+  bq.className = "btn ghost sm"; bq.type = "button"; bq.textContent = "Câu hỏi";
+  bq.addEventListener("click", () => pickImage(qid, "imgQ", drawQ));
+  const ba = document.createElement("button");
+  ba.className = "btn ghost sm"; ba.type = "button"; ba.textContent = "Đáp án";
+  ba.addEventListener("click", () => pickImage(qid, "imgA", drawA));
+  wrap.appendChild(lbl); wrap.appendChild(bq); wrap.appendChild(ba);
+
+  /* Nút sửa câu — đặt cạnh nút hình, cùng một hàng công cụ sau khi trả lời. */
+  const sep = document.createElement("span"); sep.className = "sp";
+  const bf = document.createElement("button");
+  bf.className = "btn ghost sm"; bf.type = "button"; bf.textContent = "Sửa câu / đáp án";
+  bf.addEventListener("click", openFixCard);
+  wrap.appendChild(sep); wrap.appendChild(bf);
+
+  $("#rFb").appendChild(shotsA);
+  $("#rFb").appendChild(wrap);
+}
+
+function showFb(ok, body, isHtml){
+  const d = document.createElement("div"); d.className = "fb " + (ok ? "ok" : "no");
+  d.innerHTML = '<div class="verdict">' + (ok ? "đúng" : "chưa đúng") + '</div><div class="body">' + (isHtml ? body : esc(body)) + '</div>';
+  $("#rFb").innerHTML = ""; $("#rFb").appendChild(d);
+}
+let pendingOk = null;
+function addNext(ok){
+  pendingOk = ok;
+  /* Đã trả lời xong — giờ mới mở phần hình, và cho sửa cả hình câu hỏi. */
+  addImgTools();
+  const c = R && R.queue[0];
+  if(c) renderShots($("#rImgQ"), c.it.id, "imgQ", true, () => {
+    const cc = R && R.queue[0]; if(cc) renderShots($("#rImgQ"), cc.it.id, "imgQ", true);
+  });
+  const b = document.createElement("button"); b.className = "btn"; b.style.marginTop = "12px";
+  b.textContent = "Tiếp tục →"; b.addEventListener("click", () => advance(pendingOk));
+  $("#rFb").appendChild(b); b.focus();
+}
+function redoNext(ok){
+  pendingOk = ok;
+  const fb = $("#rFb").querySelector(".fb");
+  if(fb){ fb.className = "fb " + (ok ? "ok" : "no"); fb.querySelector(".verdict").textContent = ok ? "đúng (bạn tự chấm)" : "sai (bạn tự chấm)"; }
+  toast(ok ? "Đã tính là đúng." : "Đã tính là sai.");
+}
+/* Ghi có trì hoãn: trả lời liên tiếp thì gộp lại một lần ghi, đỡ giật. */
+let saveT = null;
+function saveSoon(){ clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 1200); }
+function saveNow(){ if(saveT){ clearTimeout(saveT); saveT = null; } save(); }
+/* Đánh dấu "có thay đổi chưa đẩy lên kho". Cờ này sống cùng dữ liệu nên
+   sang lần mở sau vẫn còn, và app biết là phải đẩy trước khi kéo về.    */
+function markDirty(){ db.dirty = 1; saveSoon(); }
+
+function advance(ok){
+  let spent = 0;
+  if(R.qStart){
+    /* Trừ đi quãng bạn rời tab. Nhờ vậy mọi số đo còn lại đều là thời gian
+       bạn THẬT SỰ ngồi trước câu hỏi — và không phải vứt bỏ số đo nào.   */
+    if(R.hidAt){ R.qPaused = (R.qPaused||0) + (Date.now() - R.hidAt); R.hidAt = 0; }
+    spent = Math.max(0, Date.now() - R.qStart - (R.qPaused||0));
+    R.activeMs += Math.min(spent, 600000); R.qStart = 0;
+  }
+  const c = R.queue.shift();
+  /* Ghi thời gian giải — chỉ lần chạm ĐẦU trong phiên này. Lần thứ hai
+     trở đi trong CÙNG phiên là bạn vừa đọc đáp án nên nhanh giả tạo.
+     Còn "lần 1, lần 2, lần 3" như bạn nói là các PHIÊN khác nhau, và mỗi
+     phiên đều ghi đè bằng số đo của phiên đó.                            */
+  if(c.tries === 1 && spent) c.pendingSec = spent;
+  /* CHẤM VÀ GHI NGAY, không đợi hết phiên.
+     iPad hay bị Safari thu hồi tab khi bạn chuyển sang app khác hoặc khoá
+     màn hình. Trước đây toàn bộ phiên chỉ nằm trong bộ nhớ tạm tới lúc
+     bấm kết thúc, nên mỗi lần bị ngắt là mất trắng cả buổi — rồi lần mở
+     sau app kéo bản trên kho về và trông như "đồng bộ ngược theo máy tính".
+     Giờ mỗi câu trả lời xong là ghi xuống ổ ngay.                        */
+  if(c.firstOk !== null && !c.graded){
+    grade(c.it.id, c.firstOk ? 3 : 1);
+    if(c.pendingSec) noteTime(c.it.id, c.pendingSec);   // grade() vừa tạo bản ghi, giờ mới gắn được
+    c.graded = true; markDirty();
+  }
+  if(ok){
+    c.got++;
+    if(c.got >= c.need){ R.doneList.push(c); }
+    else R.queue.splice(Math.min(R.queue.length, 5), 0, c);
+  }else{
+    c.got = 0;
+    R.queue.splice(Math.min(R.queue.length, 3), 0, c);
+  }
+  if(!R.queue.length){ finishRun(false); return; }
+  renderCard();
+}
+function suspectCurrent(){
+  const c = R.queue[0], s = subj();
+  if(!confirm("Đưa câu này vào hộp nghi ngờ? Nó sẽ ngừng xuất hiện cho tới khi bạn duyệt lại.")) return;
+  const l = s.lessons.find(x => x.id === c.it.lessonId);
+  const q = l && l.q.find(x => x.id === c.it.id);
+  if(q){ q.suspect = true; q.at = Date.now(); save(); }
+  R.queue.shift(); R.total--;
+  if(!R.queue.length){ finishRun(false); return; }
+  renderCard(); toast("Đã đưa vào hộp nghi ngờ.");
+}
+$("#rQuit").addEventListener("click", () => { if(confirm("Dừng phiên? Những câu đã trả lời vẫn được ghi nhận.")) finishRun(true); });
+
+function finishRun(early){
+  if(rTick){ clearInterval(rTick); rTick = null; }
+  const all = R.doneList.concat(R.queue.filter(c => c.tries > 0));
+  // Phần lớn đã được chấm ngay lúc trả lời; đây chỉ vét những câu còn sót.
+  all.forEach(c => { if(c.firstOk !== null && !c.graded){ grade(c.it.id, c.firstOk ? 3 : 1); c.graded = true; } });
+
+  /* Phiên HỌC BÀI MỚI: cả trăm câu vừa chấm sẽ tới hạn cùng một ngày nếu để
+     nguyên. Dàn ngày ôn đầu tiên ra theo sức chứa thật của một phiên, để
+     phần ôn không bị nghẹn và không ra nguyên một bài.                    */
+  let learnedNow = null;
+  if(R.learn && R.lessonId){
+    const s0 = subj(), l0 = (s0.lessons||[]).find(x => x.id === R.lessonId);
+    if(l0){
+      /* Rải ra sao cho mỗi ngày chỉ nhận khoảng NỬA sức chứa một phiên —
+         nửa còn lại để dành cho các bài đã học trước đó.                  */
+      const cp = capacity(s0);
+      const perDay = Math.max(10, Math.round(cp.budgetMin*60 / (cp.secAtt*1.15) / 2));
+      spreadLesson(l0, perDay);
+      if(isLearned(l0)){
+        learnedNow = l0;
+        if(s0.reading === l0.id) s0.reading = null;
+      }
+    }
+  }
+  const answered = all.length;
+  const firstOk = all.filter(c => c.firstOk).length;
+  const acc = answered ? firstOk/answered : 0;
+  if(answered){
+    const nw = all.filter(c => c.wasNew), rv = all.filter(c => !c.wasNew);
+    db.log.push({ subj:subj().name, subjId:subj().id, label:R.label,
+                  date:new Date().toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"}),
+                  day: dayKey(), answered, firstOk, attempts:R.attempts, acc, conf:R.conf, lessonId:R.lessonId,
+                  sec: Math.round(R.activeMs/1000),
+                  newSeen: nw.length, revSeen: rv.length,
+                  revOk: rv.filter(c => c.firstOk).length,
+                  exam: !!R.exam, id: uid() });
+    if(db.log.length > 120) db.log = db.log.slice(-120);
+  }
+  save();
+  $("#dTitle").textContent = early ? "Đã dừng phiên" : "Xong phiên";
+  const eff = answered ? (R.attempts/answered).toFixed(2) : "—";
+  let h = '<div class="meters">'
+    + '<div class="meter"><div class="lab">Đúng ngay lần đầu</div><div class="val">'+Math.round(acc*100)+'%</div><div class="bar"><i class="'+band(acc)+'" style="width:'+Math.round(acc*100)+'%"></i></div></div>'
+    + '<div class="meter"><div class="lab">Số lượt để thuộc</div><div class="val">'+R.attempts+' / '+answered+'</div><div class="bar"><i style="width:'+Math.min(100,Math.round(answered/Math.max(1,R.attempts)*100))+'%"></i></div></div>'
+    + '<div class="meter"><div class="lab">Trung bình mỗi câu</div><div class="val">'+eff+'</div></div></div>'
+    + '<p class="hint">Con số đáng theo dõi là <b>số lượt trên mỗi câu</b>. Nó tiến dần về 1,00 qua các set — đó là dấu hiệu bạn thuộc thật, chứ không phải điểm phần trăm của một lượt.</p>';
+  if(R.ret){
+    const muc = Math.round(R.ret*100);
+    const thuc = R.total ? Math.round(R.doneList.filter(c => c.firstOk).length / Math.max(1, R.doneList.length) * 100) : null;
+    h += '<p class="hint">Phiên này app nhắm mức <b>' + muc + '%</b> (mỗi phiên rút một mức trong 75–85%, bạn không phải chọn).'
+       + (thuc !== null ? ' Bạn đạt <b>' + thuc + '%</b>' + (thuc > muc + 8 ? ' — cao hơn mức nhắm, nên phiên tới khoảng cách sẽ giãn thêm.'
+           : thuc < muc - 8 ? ' — thấp hơn mức nhắm, phiên tới sẽ nhẹ hơn.' : ' — sát mức nhắm.') : '') + '</p>';
+  }
+  if(learnedNow){
+    const nSaq = learnedNow.q.filter(q => !q.suspect && q.kind === "saq").length;
+    h += '<div class="note blue"><b>Đã học xong bài "' + esc(learnedNow.name) + '".</b> Bài này rời khỏi ô <b>Học bài mới</b>. '
+       + 'Từ giờ toàn bộ câu trắc nghiệm' + (nSaq ? ' và ' + nSaq + ' câu tự luận' : '') + ' của bài chảy vào ô <b>Ôn tập</b> theo lịch giãn cách. '
+       + 'Ngày ôn đầu tiên đã được rải ra nhiều ngày để phiên ôn không bị dồn cục.</div>';
+  }else if(R.learn && R.lessonId){
+    const s1 = subj(), l1 = (s1.lessons||[]).find(x => x.id === R.lessonId);
+    if(l1) h += '<div class="note"><b>Còn ' + mcqLeftIn(l1) + ' câu chưa đánh</b> trong bài "' + esc(l1.name)
+      + '". Bài vẫn nằm ở ô Học bài mới — lần sau vào lại sẽ tiếp đúng phần còn thiếu.</div>';
+  }
+  $("#dBox").innerHTML = h;
+
+  const cb = $("#dCalib");
+  if(R.conf && answered){
+    const g = CONF[R.conf].guess, diff = Math.round((g-acc)*100);
+    cb.innerHTML = '<h3>Bạn đoán so với thực tế</h3><p style="margin:0">Trước phiên bạn chấm <b>'+CONF[R.conf].label.toLowerCase()+'</b>. Thực tế đúng ngay lần đầu <b>'+Math.round(acc*100)+'%</b>.'
+      + (diff >= 10 ? ' <span style="color:var(--no)">Bạn đang tự tin hơn năng lực thật — chuyện rất thường gặp, và đó là lý do app không cho mức tự tin quyết định thứ tự ôn.</span>'
+      : diff <= -10 ? ' <span style="color:var(--ok)">Bạn làm tốt hơn mình tưởng. Đừng để cảm giác vất vả đánh lừa: khó không có nghĩa là học kém.</span>'
+      : ' Phán đoán của bạn khá khớp.') + '</p>';
+    cb.classList.remove("hidden");
+  } else cb.classList.add("hidden");
+  show("done");
+  /* Đẩy kết quả phiên lên ngay, để mở app ở máy khác là có liền. */
+  autoLastAt = 0; autoSync("xong phiên");
+}
+$("#dHome").addEventListener("click", home);
+$("#dAgain").addEventListener("click", () => { const s = subj(); const c = capacity(s); const q = buildQueue(s, Math.round(c.budgetMin*0.6), c.left); if(!q.length){ toast("Hết câu tới hạn rồi."); home(); return; } askConfidence(() => startRun(q, "Phiên thêm")); });
+
+/* =====================================================================
+   BẢN ĐỒ
+   ===================================================================== */
+function showMap(){
+  const s = subj(); if(!s){ home(); return; }
+  $("#mTitle").textContent = s.name;
+  let h = '<thead><tr><th>Bài</th><th style="width:110px">Nhớ</th><th style="width:90px">MCQ</th><th style="width:90px">SAQ</th><th style="width:120px">Tình huống</th></tr></thead><tbody>';
+  const rows = s.lessons.slice().sort((a,b) => (lessonReadiness(a) ?? -1) - (lessonReadiness(b) ?? -1));
+  rows.forEach(l => {
+    const r = lessonReadiness(l);
+    const cell = r === null ? '<span class="cell n">chưa có câu</span>'
+      : (db.fsrs[(l.q.find(q=>!q.suspect)||{}).id] ? '<span class="cell '+band(r)+'">'+Math.round(r*100)+'%</span>' : '<span class="cell n">chưa đụng</span>');
+    const nC = l.q.filter(q => q.clinical && !q.suspect).length;
+    h += '<tr><td><b>'+esc(l.name)+'</b></td><td>'+cell+'</td><td>'+l.q.filter(q=>q.kind==="mcq"&&!q.suspect).length+'</td><td>'+l.q.filter(q=>q.kind==="saq"&&!q.suspect).length+'</td>'
+      + '<td>'+(nC ? (clinicalUnlocked(l) ? '<span class="cell g">'+nC+' đã mở</span>' : '<span class="cell n">'+nC+' còn khóa</span>') : '<span class="muted sm">—</span>')+'</td></tr>';
+  });
+  $("#mTbl").innerHTML = h + '</tbody>';
+  show("map");
+}
+
+/* =====================================================================
+   NGÂN HÀNG
+   ===================================================================== */
+function showBank(){
+  const s = subj(); if(!s){ startSetup(true); return; }
+  $("#bName").value = s.name;
+  renderBankLessons(); fillLessonSel($("#bLesson")); show("bank");
+}
+function renderBankLessons(){
+  const s = subj();
+  let h = '<thead><tr><th>Bài</th><th style="width:80px">MCQ</th><th style="width:80px">SAQ</th><th style="width:90px">Nghi ngờ</th><th style="width:190px"></th></tr></thead><tbody>';
+  if(!s.lessons.length) h += '<tr><td colspan="5" class="empty">Chưa có bài nào.</td></tr>';
+  $("#bTbl").innerHTML = h + '</tbody>';
+  const tb = $("#bTbl").querySelector("tbody");
+  s.lessons.forEach(l => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = '<td><b>'+esc(l.name)+'</b></td><td>'+l.q.filter(q=>q.kind==="mcq").length+'</td><td>'+l.q.filter(q=>q.kind==="saq").length+'</td><td>'+l.q.filter(q=>q.suspect).length+'</td>';
+    const td = document.createElement("td");
+    const ren = document.createElement("button"); ren.className = "btn ghost sm"; ren.textContent = "Đổi tên";
+    ren.addEventListener("click", () => { const v = prompt("Tên mới:", l.name); if(v && v.trim()){ l.name = v.trim(); save(); renderBankLessons(); fillLessonSel($("#bLesson")); } });
+    const del = document.createElement("button"); del.className = "btn danger sm"; del.textContent = "Xóa bài";
+  del.addEventListener("click", () => {
+    if(!confirm('Xóa hẳn bài "'+l.name+'" và '+l.q.length+' câu của nó?')) return;
+    /* PHẢI ghi dấu xóa. Nếu chỉ lọc ra khỏi danh sách thì lần đồng bộ sau,
+       bản trên kho vẫn còn bài đó và phần hợp nhất coi nó là "bài máy kia
+       có mà máy này thiếu" rồi đem về — bài đã xóa mọc lại.              */
+    db.deleted[l.id] = Date.now();
+    l.q.forEach(q => { db.deleted[q.id] = Date.now(); delete db.fsrs[q.id]; });
+    s.lessons = s.lessons.filter(x => x.id !== l.id);
+    if(s.reading === l.id) s.reading = null;
+    s.at = Date.now(); markDirty(); saveNow();
+    renderBankLessons(); fillLessonSel($("#bLesson"));
+    autoLastAt = 0; if(typeof autoSync === "function") autoSync();
+    toast("Đã xóa bài — dấu xóa đã ghi, các máy khác sẽ xóa theo.");
+  });
+    td.append(ren, document.createTextNode(" "), del); tr.appendChild(td); tb.appendChild(tr);
+  });
+}
+$("#bSaveName").addEventListener("click", () => { const v = $("#bName").value.trim(); if(!v){ toast("Tên không được trống.", true); return; } subj().name = v; save(); fillSubjSel(); toast("Đã lưu."); });
+$("#bAddLesson").addEventListener("click", () => { const v = $("#bNewLesson").value.trim(); if(!v){ toast("Nhập tên bài.", true); return; }
+  subj().lessons.push({ id:uid(), name:v, q:[], at:Date.now() }); $("#bNewLesson").value = ""; save(); renderBankLessons(); fillLessonSel($("#bLesson")); toast("Đã thêm bài."); });
+$("#bNewSubj").addEventListener("click", () => startSetup(false));
+$("#bDelSubj").addEventListener("click", () => {
+  const s = subj();
+  if(!confirm('Xóa hẳn môn "'+s.name+'" cùng toàn bộ bài và câu hỏi?')) return;
+  db.deleted[s.id] = Date.now();
+  s.lessons.forEach(l => { db.deleted[l.id] = Date.now(); l.q.forEach(q => { db.deleted[q.id] = Date.now(); delete db.fsrs[q.id]; }); });
+  db.subjects = db.subjects.filter(x => x.id !== s.id);
+  db.active = db.subjects.length ? db.subjects[0].id : null;
+  save(); fillSubjSel(); home();
+});
+$("#bImp").addEventListener("click", () => {
+  const r = importInto($("#bLesson").value, $("#bKind").value, $("#bQ").value, $("#bK").value);
+  report(r, "#bRep");
+  if(r.added){ $("#bQ").value = ""; $("#bK").value = ""; renderBankLessons(); fillLessonSel($("#bLesson")); }
+});
+$("#syncBtn").addEventListener("click", openSync);
+$("#expBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(exportable(),null,2)], { type:"application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "phonghoc-" + new Date().toISOString().slice(0,10) + ".json"; a.click(); URL.revokeObjectURL(a.href);
+});
+$("#impBtn").addEventListener("click", () => $("#impFile").click());
+$("#impFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { try{
+      const d = JSON.parse(rd.result);
+      if(!d.subjects) throw new Error("không phải file sao lưu của app này");
+      const gop = confirm("Bấm OK để GỘP file này với dữ liệu đang có (giữ cả hai bên, khuyên dùng khi đồng bộ máy khác).\n\nBấm Cancel để THAY THẾ toàn bộ dữ liệu hiện tại.");
+      if(gop){ const keep = db.sync; db = mergeDB(db, d); db.sync = keep; }
+      else db = Object.assign({ subjects:[], active:null, fsrs:{}, stats:{}, log:[], settings:{newCrit:2}, deleted:{}, sync:db.sync||{} }, d);
+      normalize(); save(); fillSubjSel(); home(); toast(gop ? "Đã gộp dữ liệu." : "Đã thay bằng file sao lưu.");
+    }catch(err){ toast("File không đọc được: " + err.message, true); } };
+  rd.readAsText(f); e.target.value = "";
+});
+$("#wipeBtn").addEventListener("click", () => {
+  if(!confirm("Xóa toàn bộ môn, bài, câu hỏi và lịch ôn? Không khôi phục được.")) return;
+  if(!confirm("Chắc chắn nhé — đã tải sao lưu chưa?")) return;
+  localStorage.removeItem(KEY);
+  idbSet(KEY, "").catch(()=>{});          // xóa cả kho lớn, không thì mở lại là dữ liệu quay về
+  db = { subjects:[], active:null, fsrs:{}, stats:{}, log:[], settings:{newCrit:2} }; fillSubjSel(); startSetup(true);
+});
+
+/* =====================================================================
+   HỘP NGHI NGỜ
+   ===================================================================== */
+$("#btnAddSubj").addEventListener("click", () => startSetup(false));
+$("#btnSuspect").addEventListener("click", showSuspect);
+function showSuspect(){
+  const s = subj();
+  const list = s.lessons.flatMap(l => l.q.filter(q => q.suspect).map(q => ({ l, q })));
+  const box = $("#suspList");
+  if(!list.length){ box.innerHTML = '<div class="card"><div class="empty">Trống. Khi gặp câu sai trong lúc học, bấm “Câu này sai” để đưa vào đây.</div></div>'; show("susp"); return; }
+  box.innerHTML = "";
+  list.forEach(({l,q}) => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = '<div class="qmeta"><span>'+esc(l.name)+'</span><span class="tagx">'+(q.kind === "saq" ? "tự luận" : "trắc nghiệm")+'</span></div>'
+      + '<p class="stem" style="font-size:16px">'+esc(q.stem)+'</p>'
+      + (q.kind === "mcq" ? '<div class="sm muted">Đáp án ghi nhận: <b>'+esc(q.answer||"—")+'</b></div>' : '')
+      + (q.explain ? '<div class="model" style="margin-top:8px">'+esc(q.explain)+'</div>' : '');
+    const row = document.createElement("div"); row.className = "row"; row.style.marginTop = "12px";
+    const back = document.createElement("button"); back.className = "btn ghost sm"; back.textContent = "Trả lại — câu này vẫn đúng";
+    back.addEventListener("click", () => { q.suspect = false; q.at = Date.now(); save(); showSuspect(); toast("Đã trả lại ngân hàng."); });
+    const del = document.createElement("button"); del.className = "btn danger sm"; del.textContent = "Xóa hẳn";
+    del.addEventListener("click", () => { if(!confirm("Xóa hẳn câu này?")) return; db.deleted[q.id] = Date.now(); l.q = l.q.filter(x => x.id !== q.id); delete db.fsrs[q.id]; save(); showSuspect(); toast("Đã xóa."); });
+    row.append(back, del); d.appendChild(row); box.appendChild(d);
+  });
+  show("susp");
+}
+
+/* =====================================================================
+   ĐỒNG BỘ GIỮA MÁY TÍNH VÀ ĐIỆN THOẠI
+
+   Hai máy làm hai việc khác nhau: máy tính soạn và dán câu hỏi, điện thoại
+   học và sinh ra lịch sử ôn. Nếu chỉ "lấy bản mới hơn" thì bên nào ghi sau
+   sẽ xóa công của bên kia. Vì vậy app GỘP theo từng phần:
+     · câu hỏi và bài  → gộp cả hai bên, bản có dấu thời gian mới hơn thắng
+     · lịch ôn FSRS    → mỗi câu lấy lần ôn GẦN NHẤT, bất kể từ máy nào
+     · nhật ký phiên   → gộp, bỏ trùng theo mã phiên
+     · thứ đã xóa      → bia mộ, để không bị hồi sinh khi gộp
+   ===================================================================== */
+function mergeDB(a, b){
+  const out = { subjects:[], active:null, fsrs:{}, stats:{}, log:[], settings:null, deleted:{}, sync:a.sync || {}, updatedAt:Math.max(a.updatedAt||0, b.updatedAt||0) };
+  const dead = Object.assign({}, a.deleted||{}, b.deleted||{});
+  out.deleted = dead;
+
+  const pick = (x,y) => !y ? x : !x ? y : ((y.at||0) > (x.at||0) ? y : x);
+  const byId = arr => { const m = {}; (arr||[]).forEach(x => m[x.id] = x); return m; };
+
+  const sa = byId(a.subjects), sb = byId(b.subjects);
+  Object.keys(Object.assign({}, sa, sb)).forEach(sid => {
+    if(dead[sid]) return;
+    const base = pick(sa[sid], sb[sid]);
+    const la = byId((sa[sid]||{}).lessons), lb = byId((sb[sid]||{}).lessons);
+    const lessons = [];
+    Object.keys(Object.assign({}, la, lb)).forEach(lid => {
+      if(dead[lid]) return;
+      const lbase = pick(la[lid], lb[lid]);
+      const qa = byId((la[lid]||{}).q), qb = byId((lb[lid]||{}).q);
+      const q = [];
+      Object.keys(Object.assign({}, qa, qb)).forEach(qid => { if(dead[qid]) return; q.push(pick(qa[qid], qb[qid])); });
+      lessons.push(Object.assign({}, lbase, { q }));
+    });
+    out.subjects.push(Object.assign({}, base, { lessons }));
+  });
+
+  const fa = a.fsrs||{}, fb = b.fsrs||{};
+  Object.keys(Object.assign({}, fa, fb)).forEach(qid => {
+    if(dead[qid]) return;
+    const x = fa[qid], y = fb[qid];
+    out.fsrs[qid] = !y ? x : !x ? y : ((y.last||0) > (x.last||0) ? y : x);
+  });
+
+  const seen = {};
+  (a.log||[]).concat(b.log||[]).forEach(x => { const k = x.id || (x.day+"|"+x.sec+"|"+x.answered); if(!seen[k]) seen[k] = x; });
+  out.log = Object.values(seen).sort((x,y) => (x.day||"").localeCompare(y.day||"")).slice(-120);
+
+  out.settings = ((b.updatedAt||0) > (a.updatedAt||0) ? b.settings : a.settings) || a.settings || b.settings;
+  out.active = out.subjects.some(x => x.id === a.active) ? a.active : (out.subjects[0] ? out.subjects[0].id : null);
+  return out;
+}
+function mergeStats(before, after){
+  const cq = d => (d.subjects||[]).reduce((n,s) => n + s.lessons.reduce((m,l) => m + l.q.length, 0), 0);
+  const nf = d => Object.keys(d.fsrs || {}).length;
+  /* Đếm cả số thẻ có LỊCH ÔN MỚI HƠN — đây mới là "tiến độ học", và trước
+     đây app không báo nên không biết tiến độ có về hay không.            */
+  let fresher = 0;
+  const fb = before.fsrs || {}, fa = after.fsrs || {};
+  Object.keys(fa).forEach(k => { if(!fb[k] || (fa[k].last||0) > (fb[k].last||0)) fresher++; });
+  return { addedQ: cq(after) - cq(before), addedLog: (after.log||[]).length - (before.log||[]).length,
+           addedFsrs: nf(after) - nf(before), fresher, totalFsrs: nf(after),
+           subjects: (after.subjects||[]).length };
+}
+
+/* ---------- Kênh tự động: GitHub Gist riêng tư ---------- */
+/* Che mã truy cập: đủ để bạn ĐỐI CHIẾU xem app đang giữ mã nào, nhưng
+   không lộ mã. Thiếu nó thì không cách nào biết app giữ mã cũ hay mới.  */
+function maskTok(t){
+  if(!t) return "(trống)";
+  return t.length <= 14 ? t.slice(0,6) + "…" : t.slice(0,8) + "…" + t.slice(-4);
+}
+
+async function gistCall(method, path, body){
+  const t = (db.sync||{}).token;
+  if(!t) throw new Error("Chưa có mã truy cập");
+  const r = await fetch("https://api.github.com" + path, {
+    method, headers: { "Authorization":"Bearer " + t, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(r.ok && db.sync) db.sync.okAt = Date.now();   // mốc để biết mã còn dùng được
+  if(!r.ok){
+    let hint = "";
+    if(r.status === 401) hint = " — mã này không còn đúng. Vào github.com/settings/tokens kiểm tra: nếu mã app đang giữ (xem dòng dưới ô dán) không khớp mã nào trong danh sách thì nó đã bị xóa. Tạo mã mới (classic, tick gist) rồi dán vào ô trên";
+    else if(r.status === 403) hint = " — mã thiếu quyền gist, hãy tạo lại và tick ô gist";
+    else if(r.status === 404) hint = " — thường là mã truy cập THIẾU QUYỀN GIST (GitHub trả 404 thay vì 403 cho kho riêng tư). Vào GitHub, sửa hoặc tạo lại mã và tick ô gist. Nếu đã tick rồi thì xóa trống ô mã kho để tạo kho mới";
+    throw new Error("GitHub trả về " + r.status + hint);
+  }
+  return r.json();
+}
+function exportable(){
+  const c = JSON.parse(JSON.stringify(db));
+  if(c.sync) delete c.sync.token;          // không bao giờ đẩy mã truy cập lên
+  return c;
+}
+/* Liệt kê các kho "phonghoc.json" đã có trên tài khoản, để máy thứ hai nối
+   vào đúng kho thay vì lỡ tay tạo kho mới rồi kéo về rỗng. */
+async function listVaults(){
+  const gs = await gistCall("GET", "/gists?per_page=100");
+  return (gs||[]).filter(g => g.files && g.files["phonghoc.json"])
+    .map(g => ({ id:g.id, at:g.updated_at, size:(g.files["phonghoc.json"]||{}).size||0 }))
+    .sort((a,b) => new Date(b.at) - new Date(a.at));
+}
+/* =====================================================================
+   TÁCH ẢNH RA KHỎI GÓI ĐỒNG BỘ CHÍNH
+   Ảnh nặng gấp nhiều lần phần chữ. Để chung một tệp thì mỗi lần đồng bộ
+   phải tải đi tải lại vài MB, càng ngày càng ì rồi lỗi. Giờ ảnh nằm ở
+   tệp thứ hai trong CÙNG gist, và chỉ đẩy lại khi ảnh thật sự đổi.
+   ===================================================================== */
+const IMG_FILE = "phonghoc-img.json";
+/* Ảnh đã nằm sẵn ở kho riêng (IMGS), nên đồng bộ không phải tách gì nữa.
+   Gộp ảnh từ kho trên mây vào máy: chỉ THÊM, không bao giờ xoá — tệp ảnh
+   trên mây lỗi hay tải hụt thì ảnh trong máy vẫn nguyên.                */
+function mergeImages(remoteImgs){
+  if(!remoteImgs) return 0;
+  let added = 0;
+  Object.keys(remoteImgs).forEach(id => {
+    const r = remoteImgs[id]; if(!r) return;
+    const cur = IMGS[id] || (IMGS[id] = {});
+    ["imgQ","imgA"].forEach(k => { if(r[k] && !cur[k]){ cur[k] = r[k]; added++; } });
+  });
+  if(added) imgsDirty = true;
+  return added;
+}
+/* Chữ ký rẻ tiền để biết ảnh có đổi không, khỏi đẩy lại vài MB vô ích. */
+function imgSig(imgs){
+  const ids = Object.keys(imgs).sort();
+  let n = 0;
+  ids.forEach(id => { ["imgQ","imgA"].forEach(k => (imgs[id][k]||[]).forEach(s => { n += s.length; })); });
+  return ids.length + ":" + n;
+}
+
+async function syncNow(silent){
+  const st = db.sync || {};
+  if(!st.token) throw new Error("Chưa thiết lập đồng bộ");
+  st.justCreated = false;
+  const readFile = async (g, name, fallback) => {
+    const f = g.files && (g.files[name] || (fallback ? Object.values(g.files)[0] : null));
+    if(!f) return null;
+    const raw = f.truncated && f.raw_url ? await (await fetch(f.raw_url)).text() : f.content;
+    try{ return JSON.parse(raw); }catch(e){ return null; }
+  };
+  let remote = null, remoteImgs = null;
+  if(st.gistId){
+    const g = await gistCall("GET", "/gists/" + st.gistId);
+    remote = await readFile(g, "phonghoc.json", true);
+    if(remote === null && g.files && Object.keys(g.files).length) throw new Error("Dữ liệu trên mây hỏng, không đọc được");
+    /* Tải ảnh cũng được phép hỏng. Tệp ảnh có thể vài MB; mạng yếu mà nó
+       ngã thì tiến độ vẫn phải về được.                                  */
+    try{ remoteImgs = await readFile(g, IMG_FILE, false); }
+    catch(e){ remoteImgs = null; console.warn("Chưa tải được phần ảnh", e); }
+  }
+  const before = JSON.parse(JSON.stringify(db));
+  mergeImages(remoteImgs);                   // ảnh chỉ được THÊM, không bao giờ bị xoá
+  if(remote && remote.subjects){
+    pullOutImages(remote);                   // bản cũ trên kho có thể còn ảnh lẫn trong chữ
+    const merged = mergeDB(db, remote);
+    merged.sync = db.sync;
+    db = merged; normalize();
+    saveNow();
+  }
+
+  const out = exportable();                  // đã sạch ảnh sẵn
+  const imgs = IMGS;
+  const sig = imgSig(imgs);
+
+  /* ĐẨY PHẦN CHỮ TRƯỚC, MỘT MÌNH.
+     Tiến độ học của bạn nằm ở phần chữ và chỉ nặng vài chục KB — nó phải
+     lên được trong mọi hoàn cảnh. Trước đây ảnh đi kèm trong cùng một lần
+     đẩy, nên 4,5 MB ảnh hỏng là kéo theo mất luôn tiến độ, và vì chữ ký
+     ảnh chưa kịp ghi nên lần sau lại đẩy lại từ đầu — chậm mãi không xong. */
+  const files = { "phonghoc.json": { content: JSON.stringify(out) } };
+  if(st.gistId) await gistCall("PATCH", "/gists/" + st.gistId, { files });
+  else{
+    const g = await gistCall("POST", "/gists", { description:"Phòng học — dữ liệu ôn thi", public:false, files });
+    db.sync.gistId = g.id; saveNow();
+    db.sync.justCreated = true;
+  }
+  db.sync.lastAt = Date.now();
+  db.dirty = 0;              // tiến độ đã an toàn — xoá cờ ngay tại đây
+  saveNow();
+
+  /* ẢNH ĐI SAU, VÀ ĐƯỢC PHÉP HỎNG.
+     Hỏng thì chỉ ảnh chưa lên, tiến độ vẫn nguyên. Lần sau thử lại.      */
+  if(Object.keys(imgs).length && sig !== st.imgSig){
+    try{
+      await gistCall("PATCH", "/gists/" + db.sync.gistId, { files:{ [IMG_FILE]:{ content: JSON.stringify(imgs) } } });
+      db.sync.imgSig = sig; saveNow();
+    }catch(e){
+      console.warn("Chưa đẩy được phần ảnh, tiến độ vẫn đã lưu", e);
+    }
+  }
+  const m = mergeStats(before, db);
+  if(!silent) toast("Đã đồng bộ" + (m.addedQ > 0 ? " · nhận thêm " + m.addedQ + " câu" : "") + (m.addedLog > 0 ? " · " + m.addedLog + " phiên" : ""));
+  return m;
+}
+function pairCode(){
+  const st = db.sync || {};
+  if(!st.token || !st.gistId) return "";
+  try{ return "PH1:" + btoa(JSON.stringify({ t:st.token, g:st.gistId })); }catch(e){ return ""; }
+}
+function applyPair(code){
+  const c = String(code||"").trim();
+  if(c.indexOf("PH1:") !== 0) throw new Error("Mã ghép không đúng dạng (phải bắt đầu bằng PH1:)");
+  let o; try{ o = JSON.parse(atob(c.slice(4))); }catch(e){ throw new Error("Mã ghép hỏng hoặc bị thiếu ký tự"); }
+  if(!o.t || !o.g) throw new Error("Mã ghép thiếu thông tin");
+  db.sync = Object.assign({}, db.sync, { token:o.t, gistId:o.g }); save();
+}
+function openSync(){
+  const st = db.sync || {};
+  const when = st.lastAt ? new Date(st.lastAt).toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "chưa lần nào";
+  openModal('<h2>Đồng bộ máy tính ↔ điện thoại</h2><p class="sub">Lần gần nhất: ' + when + (st.gistId ? ' · mã kho: ' + esc(st.gistId.slice(0,8)) + '…' : '') + '</p>'
+    + '<div class="field"><label for="syTok">Mã truy cập GitHub (dán một lần cho mỗi máy)</label>'
+    + '<input type="text" id="syTok" placeholder="Dán chuỗi ghp_… vào ĐÂY" value="" autocomplete="off">'
+    + (st.token
+        ? '<p class="hint">Máy này <b>đang giữ</b> mã <b>' + esc(maskTok(st.token)) + '</b>'
+          + (st.okAt ? ' · dùng được lần cuối lúc ' + new Date(st.okAt).toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : ' · chưa lần nào dùng được')
+          + '. Nếu GitHub báo 401 thì mã này không còn đúng — dán mã mới vào ô trên, hoặc '
+          + '<a href="#" id="syClear">xoá mã đang giữ</a>.</p>'
+        : '<p class="hint" style="color:var(--no)">Máy này <b>chưa có mã nào</b>. Dán chuỗi ghp_… vào ô trên.</p>')
+    + '<p class="hint">Tạo tại github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token, chỉ tick ô <b>gist</b>. Mã này chỉ nằm trong máy bạn, không đi vào file sao lưu.</p></div>'
+    + '<div class="field"><label for="syGist">Mã kho dữ liệu — KHÔNG phải chỗ dán ghp_</label>'
+    + '<input type="text" id="syGist" value="' + esc(st.gistId||"") + '" placeholder="Để trống ở máy đầu tiên" autocomplete="off">'
+    + '<p class="hint">Ô này để trống ở máy đầu tiên — app tự sinh sau khi đồng bộ. Chuỗi dạng chữ và số, không có tiền tố ghp_.</p></div>'
+    + '<div class="row"><button class="btn" id="syGo">Đồng bộ ngay</button>'
+    + '<button class="btn ghost" id="syFind">Tìm kho có sẵn</button>'
+    + '<button class="btn ghost" id="sySave">Chỉ lưu thiết lập</button><span class="sp"></span><button class="lk" data-close>Đóng</button></div>'
+    + '<div id="syVaults"></div>'
+    + '<p class="hint" id="syMsg" style="margin-top:12px"></p>'
+    + '<div style="border-top:1px solid var(--line);margin:16px 0 0;padding-top:14px">'
+    + '<label>Chuyển sang máy khác bằng một mã ghép</label>'
+    + '<div class="row" style="margin-bottom:6px"><input type="text" id="syPair" readonly value="' + esc(pairCode()) + '" placeholder="Đồng bộ lần đầu xong sẽ có mã ở đây" style="flex:1;min-width:150px;font-family:var(--mono);font-size:12px">'
+    + '<button class="btn ghost sm" id="syCopy">Sao chép</button></div>'
+    + '<p class="hint">Mã này chứa cả mã truy cập lẫn mã kho. Gửi cho chính mình qua Zalo hoặc email rồi dán vào máy kia — khỏi gõ tay. <b>Coi nó như mật khẩu</b>, đừng gửi cho ai khác.</p>'
+    + '<div class="row" style="margin-top:10px"><input type="text" id="syPasteIn" placeholder="Dán mã ghép nhận được vào đây" style="flex:1;min-width:150px">'
+    + '<button class="btn ghost sm" id="syPasteGo">Áp dụng</button></div></div>'
+    + '<p class="hint">Cách gộp: câu hỏi từ hai máy được cộng lại; với lịch ôn của mỗi câu, app lấy lần ôn gần nhất bất kể từ máy nào. Câu bạn đã xóa sẽ không sống lại.</p>');
+  const looksToken = v => /^(ghp_|gho_|ghu_|ghs_|github_pat_)/.test(v);
+  const grab = () => { db.sync = db.sync || {};
+    let t = $("#syTok").value.trim(), g = $("#syGist").value.trim();
+    // Dán nhầm ô là lỗi rất dễ mắc: mã truy cập luôn bắt đầu bằng ghp_ hoặc
+    // github_pat_, còn mã kho thì không. Phát hiện thì tự chuyển về đúng ô.
+    if(!t && looksToken(g)){ t = g; g = ""; $("#syTok").value = t; $("#syGist").value = "";
+      toast("Mã truy cập bị dán nhầm ô — đã chuyển lên đúng chỗ."); }
+    else if(looksToken(g) && t === g){ g = ""; $("#syGist").value = ""; }
+    if(t) db.sync.token = t;
+    // Ô trống nghĩa là "quên kho cũ, tạo kho mới" — trước đây app vẫn giữ ngầm
+    // mã kho cũ nên xóa ô không có tác dụng gì.
+    db.sync.gistId = looksToken(g) ? "" : g;
+    save(); };
+  const clr = $("#syClear");
+  if(clr) clr.addEventListener("click", e => {
+    e.preventDefault();
+    if(!confirm("Xóa mã truy cập đang giữ trên máy này?\n\nDữ liệu học KHÔNG bị mất — chỉ mất chìa khóa vào kho. Mã kho vẫn giữ nguyên, dán mã mới vào là đồng bộ lại được.")) return;
+    if(db.sync){ delete db.sync.token; delete db.sync.okAt; }
+    saveNow(); closeModal(); openSync();
+    toast("Đã xóa mã. Dán mã mới vào ô trên cùng.");
+  });
+  $("#sySave").addEventListener("click", () => { grab(); toast("Đã lưu thiết lập đồng bộ."); });
+  $("#syCopy").addEventListener("click", async () => {
+    const v = $("#syPair").value;
+    if(!v){ toast("Chưa có mã — hãy đồng bộ lần đầu ở máy này trước.", true); return; }
+    try{ await navigator.clipboard.writeText(v); toast("Đã sao chép mã ghép."); }
+    catch(e){ $("#syPair").select(); toast("Không tự chép được — hãy bấm giữ rồi chọn Copy.", true); }
+  });
+  $("#syPasteGo").addEventListener("click", () => {
+    const msg = $("#syMsg");
+    try{
+      applyPair($("#syPasteIn").value);
+      $("#syGist").value = db.sync.gistId; $("#syPair").value = pairCode();
+      msg.innerHTML = 'Đã nhận mã ghép. Bấm <b>Đồng bộ ngay</b> để kéo dữ liệu về.';
+      toast("Đã nhận mã ghép.");
+    }catch(e){ msg.innerHTML = '<span style="color:var(--no)">' + esc(e.message) + '</span>'; }
+  });
+  $("#syFind").addEventListener("click", async () => {
+    grab();
+    const msg = $("#syMsg"), box = $("#syVaults");
+    if(!((db.sync||{}).token||"").trim()){ msg.innerHTML = '<span style="color:var(--no)">Dán mã truy cập vào ô trên cùng trước đã.</span>'; return; }
+    msg.textContent = "Đang dò các kho trên GitHub…"; box.innerHTML = "";
+    try{
+      const vs = await listVaults();
+      msg.textContent = "";
+      if(!vs.length){ box.innerHTML = '<p class="hint">Tài khoản này chưa có kho nào. Bấm Đồng bộ ngay để tạo kho đầu tiên.</p>'; return; }
+      let h = '<p class="hint" style="margin:10px 0 6px">Chọn kho để nối vào (kho lớn nhất thường là kho chứa dữ liệu thật):</p>';
+      vs.forEach(v => { h += '<button class="pick" data-v="' + v.id + '"><span><b>' + esc(v.id.slice(0,10)) + '…</b>'
+        + '<span>' + Math.round(v.size/1024) + ' KB · sửa lần cuối ' + new Date(v.at).toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) + '</span></span></button>'; });
+      box.innerHTML = h;
+      box.querySelectorAll("[data-v]").forEach(b2 => b2.addEventListener("click", () => {
+        $("#syGist").value = b2.dataset.v; db.sync.gistId = b2.dataset.v; save();
+        box.innerHTML = ""; msg.innerHTML = 'Đã chọn kho <b>' + esc(b2.dataset.v.slice(0,10)) + '…</b>. Bấm <b>Đồng bộ ngay</b> để kéo dữ liệu về.';
+      }));
+    }catch(e){ msg.innerHTML = '<span style="color:var(--no)">' + esc(e.message) + '</span>'; box.innerHTML = ""; }
+  });
+  $("#syGo").addEventListener("click", async () => {
+    grab();
+    const msg = $("#syMsg");
+    const tok = ((db.sync||{}).token || "").trim();
+    if(!tok){ msg.innerHTML = '<span style="color:var(--no)">Ô <b>Mã truy cập GitHub</b> (ô trên cùng) đang trống. Dán chuỗi ghp_… vào đó.</span>'; return; }
+    if(!looksToken(tok)){ msg.innerHTML = '<span style="color:var(--amber)">Chuỗi trong ô mã truy cập không giống mã GitHub (thường bắt đầu bằng <b>ghp_</b>). Kiểm tra lại xem có dán nhầm không.</span>'; return; }
+    if(!((db.sync||{}).gistId||"").trim()){
+      if(!confirm("Ô mã kho đang trống nên app sẽ TẠO MỘT KHO MỚI, RỖNG.\n\nNếu bạn muốn nối vào kho của máy kia, hãy bấm Hủy rồi dùng nút \"Tìm kho có sẵn\", hoặc dán mã ghép từ máy kia.\n\nVẫn tạo kho mới?")) { msg.innerHTML = 'Đã hủy. Dùng <b>Tìm kho có sẵn</b> để nối vào kho của máy kia.'; return; }
+    }
+    msg.textContent = "Đang đồng bộ…";
+    try{ const m = await syncNow(true);
+      msg.innerHTML = 'Xong. Nhận thêm <b>' + Math.max(0,m.addedQ) + '</b> câu · <b>' + Math.max(0,m.fresher) + '</b> thẻ tiến độ mới hơn · <b>' + Math.max(0,m.addedLog) + '</b> phiên.'
+        + '<br>Tổng số thẻ đã có lịch ôn trên máy này: <b>' + m.totalFsrs + '</b>. Mã kho: <b>' + esc(db.sync.gistId||"") + '</b>'
+        + (db.sync.justCreated ? '<br><span style="color:var(--amber)">Đây là kho MỚI vừa tạo. Nếu bạn định nối vào kho của máy kia mà nhận về 0 câu, hãy bấm “Tìm kho có sẵn” và chọn đúng kho.</span>' : '');
+      $("#syPair").value = pairCode(); $("#syGist").value = db.sync.gistId || "";
+      fillSubjSel();
+    }catch(e){ msg.innerHTML = '<span style="color:var(--no)">' + esc(e.message) + '</span>'; }
+  });
+}
+/* =====================================================================
+   NHẬP TỪ FILE VĂN BẢN  (khỏi phải quét chọn rồi copy)
+   ===================================================================== */
+let pickTarget = null;
+function readTextInto(file, id){
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = () => { $("#"+id).value = String(rd.result); toast('Đã nạp "' + file.name + '" vào ô.'); };
+  rd.onerror = () => toast("Không đọc được file.", true);
+  rd.readAsText(file, "utf-8");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pick]");
+  if(!b) return;
+  pickTarget = b.dataset.pick; $("#txtFile").click();
+});
+$("#txtFile").addEventListener("change", e => { readTextInto(e.target.files[0], pickTarget); e.target.value = ""; });
+["impQ","impK","bQ","bK"].forEach(id => {
+  const el = document.getElementById(id); if(!el) return;
+  el.addEventListener("dragover", e => { e.preventDefault(); el.style.borderColor = "var(--blue)"; });
+  el.addEventListener("dragleave", () => { el.style.borderColor = ""; });
+  el.addEventListener("drop", e => {
+    e.preventDefault(); el.style.borderColor = "";
+    const f = e.dataTransfer.files[0];
+    if(f) readTextInto(f, id);
+    else { const t = e.dataTransfer.getData("text"); if(t) el.value = t; }
+  });
+});
+
+/* =====================================================================
+   CHỮ VÀ NỀN
+   ===================================================================== */
+const READ_DEF = { size:"m", font:"lexend", theme:"light" };
+function applyRead(){
+  const r = db.settings.read || READ_DEF;
+  const e = document.documentElement;
+  e.dataset.size = r.size; e.dataset.font = r.font; e.dataset.theme = r.theme;
+}
+function openRead(){
+  const r = db.settings.read || READ_DEF;
+  const mk = (key, opts) => '<div class="optrow">' + opts.map(o =>
+      '<button class="ob" data-k="'+key+'" data-v="'+o[0]+'" aria-pressed="'+(r[key]===o[0])+'">'+o[1]+'</button>').join("") + '</div>';
+  openModal('<h2>Chữ và nền</h2><p class="sub">Đổi ngay, lưu lại cho lần sau.</p>'
+    + '<div class="samp"><p>Bệnh nhân nam, 58 tuổi, phát hiện tình cờ nang thận 4 cm có nhiều vách mỏng, vôi hóa dạng nốt, không đo được tăng quang.</p></div>'
+    + '<label>Cỡ chữ</label>' + mk("size", [["s","Nhỏ"],["m","Vừa"],["l","Lớn"]])
+    + '<label>Kiểu chữ</label>' + mk("font", [["lexend","Lexend"],["serif","Có chân"],["sans","Không chân"]])
+    + '<label>Nền</label>' + mk("theme", [["light","Trắng"],["ivory","Ngà"],["dark","Tối"]])
+    + '<p class="hint" style="margin-top:14px">Độ khó phiên ôn không cần đặt: mỗi phiên app tự rút một ngưỡng nhớ mục tiêu trong khoảng <b>75–85%</b>. Nghĩa là có phiên bạn đúng nhiều, có phiên sai nhiều — đó là chủ ý, vì đúng lúc phải cố nhớ lại mới là lúc ghi nhớ mạnh nhất. Ngưỡng đã rút được ghi ở cuối mỗi phiên.</p>'
+    + '<label>Thiết bị này là</label><div class="optrow">'
+      + ['auto','pc','phone'].map(v => '<button class="ob" data-dev="' + v + '" aria-pressed="' + (devMode()===v) + '">'
+          + ({auto:"Tự nhận", pc:"Máy tính", phone:"Điện thoại"}[v]) + '</button>').join("") + '</div>'
+    + '<p class="hint">Máy này đang được coi là <b>' + (isPhone() ? "điện thoại" : "máy tính") + '</b>'
+      + (devMode()==="auto" ? " (tự nhận)" : " (bạn tự đặt)") + '. Trên điện thoại, phiên học chỉ lấy câu trắc nghiệm — câu tự luận để dành cho máy tính. Thiết lập này chỉ nằm trong máy này, không đi theo đồng bộ.</p>' 
+    + '<p class="hint">Nền ngà bớt chói khi học ban ngày lâu; nền tối hợp buổi đêm. <b>Lexend</b> là font dựng riêng cho việc đọc, tải từ mạng — nếu máy đang ngoại tuyến thì tự rơi về font hệ thống. Chữ <b>có chân</b> nằm sẵn trong máy nên lúc nào cũng dùng được.</p>'
+    + '<div class="row" style="margin-top:14px"><span class="sp"></span><button class="btn" data-close>Xong</button></div>');
+  $("#mboxIn").querySelectorAll("[data-dev]").forEach(b => b.addEventListener("click", () => {
+    setDevMode(b.dataset.dev);
+    $("#mboxIn").querySelectorAll("[data-dev]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    toast("Máy này giờ được coi là " + (isPhone() ? "điện thoại — phiên chỉ có trắc nghiệm" : "máy tính — có cả tự luận"));
+    home();
+  }));
+  $("#mboxIn").querySelectorAll(".ob[data-k]").forEach(b => b.addEventListener("click", () => {
+    db.settings.read = Object.assign({}, db.settings.read || READ_DEF);
+    db.settings.read[b.dataset.k] = b.dataset.v;
+    save(); applyRead();
+    $("#mboxIn").querySelectorAll('.ob[data-k="'+b.dataset.k+'"]').forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+}
+$("#navRead").addEventListener("click", openRead);
+$("#navSync").addEventListener("click", openSync);
+
+/* =====================================================================
+   MODAL
+   ===================================================================== */
+/* =====================================================================
+   Ô "HỌC BÀI MỚI"
+   Chọn một bài chưa học → đánh toàn bộ trắc nghiệm của bài trong một lượt.
+   Xong thì bài tự rời danh sách này, và cả MCQ lẫn SAQ của nó chảy sang
+   ô Ôn tập theo lịch FSRS bình thường.
+   ===================================================================== */
+/* Bỏ dấu để tìm kiếm: gõ "hamochromatose" vẫn ra "Hämochromatose",
+   gõ "leberzirrhose" ra đúng bài, và tiếng Việt gõ không dấu cũng ra. */
+function noAccent(s){
+  return String(s||"").toLowerCase()
+    .replace(/ß/g, "ss").replace(/đ/g, "d")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/* =====================================================================
+   ĐÁNH DẤU "ĐÃ ĐÁNH BÀI NÀY" — cứu khi mất dữ liệu do đồng bộ hỏng
+   Bạn đã làm xong bài trên máy khác nhưng phần chấm bị mất. Ô tick này
+   tạo lại trạng thái cho những câu chưa có, để bài chuyển sang ô Ôn tập.
+
+   Quan trọng: KHÔNG có điểm thật để dựng lại, nên app cố ý ghi độ bền
+   THẤP (mức "khó", ~1,4 ngày) chứ không phải mức "nhớ tốt". Hệ quả:
+   những câu này quay lại rất sớm, và ngay lần ôn đầu tiên chúng được
+   chấm bằng dữ liệu THẬT của bạn, thay cho con số ước lượng. Nếu ghi độ
+   bền cao thì câu sẽ ngủ cả tuần dựa trên một phỏng đoán — đúng kiểu sai
+   sót âm thầm mà bạn không phát hiện được.
+
+   Mọi trạng thái tạo kiểu này được gắn cờ est=1 để bỏ tick gỡ được đúng
+   phần ước lượng, không đụng tới tiến độ thật.
+   ===================================================================== */
+function markedCount(l){
+  return lessonMCQ(l).filter(q => (db.fsrs[q.id]||{}).est).length;
+}
+function markLessonDone(l){
+  const now = Date.now(), fresh = lessonMCQ(l).filter(q => !(db.fsrs[q.id]||{}).last);
+  if(!fresh.length) return 0;
+  fresh.forEach(q => {
+    db.fsrs[q.id] = { s:W[1], d:initD(2), last:now,
+                      due: now + fuzzIvl(interval(W[1]))*DAY,
+                      reps:1, fails:0, lapses:0, est:1 };
+  });
+  /* Rải ngày ôn đầu ra, không thì cả bài đổ vào cùng một hôm. */
+  const cp = capacity(subj());
+  spreadLesson(l, Math.max(10, Math.round(cp.budgetMin*60 / (cp.secAtt*1.15) / 2)));
+  l.at = Date.now(); markDirty(); saveNow();
+  return fresh.length;
+}
+function unmarkLesson(l){
+  let n = 0;
+  lessonMCQ(l).forEach(q => { if((db.fsrs[q.id]||{}).est){ delete db.fsrs[q.id]; n++; } });
+  if(n){ l.at = Date.now(); markDirty(); saveNow(); }
+  return n;
+}
+
+function openLearnPicker(){
+  const s = subj();
+  /* Danh sách gồm bài CHƯA HỌC, cộng thêm những bài đã học nhờ ĐÁNH DẤU —
+     nếu không, tick xong là bài biến mất và bạn không bỏ tick được nữa. */
+  const left = (s.lessons||[]).filter(l => lessonMCQ(l).length > 0 && (!isLearned(l) || markedCount(l) > 0));
+  if(!left.length){ toast("Đã học hết các bài có câu hỏi.", true); return; }
+
+  const rows = left.map(l => {
+    const tot = lessonMCQ(l).length, rem = mcqLeftIn(l), mk = markedCount(l);
+    const nSaq = l.q.filter(q => !q.suspect && q.kind === "saq").length;
+    return { id:l.id, key:noAccent(l.name), html:
+      '<div class="lrow2">'
+      + '<label class="tickwrap" title="Đánh dấu là đã đánh xong bài này (dùng khi mất dữ liệu do đồng bộ)">'
+      +   '<input type="checkbox" class="tick" data-mark="'+l.id+'"' + (mk ? " checked" : "") + '>'
+      +   '<span>đã đánh</span></label>'
+      + '<button class="pick" data-learn="'+l.id+'" style="margin-bottom:0;flex:1"><span><b>'+esc(l.name)+'</b><span>'
+      + rem + ' câu trắc nghiệm chưa đánh' + (rem < tot ? ' · đã đánh ' + (tot-rem) + '/' + tot : '')
+      + (mk ? ' · ' + mk + ' câu đang đánh dấu ước lượng' : '')
+      + (nSaq ? ' · ' + nSaq + ' câu tự luận sẽ sang ô ôn tập sau' : '') + '</span></span></button>'
+      + '</div>' };
+  });
+
+  let h = '<h2>Học bài mới</h2><p class="sub">Chọn một bài — app đưa toàn bộ câu trắc nghiệm của bài đó ra một lượt. '
+        + 'Đánh dở rồi dừng cũng được: lần sau vào lại sẽ tiếp đúng phần còn thiếu.</p>'
+        + '<input type="text" id="lsFind" placeholder="Tìm tên bài… (gõ không dấu cũng được)" '
+        + 'style="width:100%;margin-bottom:6px" autocomplete="off">'
+        + '<p class="sub" id="lsCount" style="margin:0 0 10px"></p>'
+        + '<div id="lsList"></div>'
+        + '<div class="row" style="margin-top:12px"><span class="sp"></span><button class="lk" data-close>Đóng</button></div>';
+  openModal(h);
+
+  const list = $("#lsList"), cnt = $("#lsCount"), find = $("#lsFind");
+  function draw(){
+    const qy = noAccent(find.value.trim());
+    const hit = qy ? rows.filter(r => r.key.includes(qy)) : rows;
+    list.innerHTML = hit.length ? hit.map(r => r.html).join("")
+      : '<p class="sub" style="padding:14px 0">Không có bài nào khớp “' + esc(find.value.trim()) + '”.</p>';
+    cnt.textContent = qy ? (hit.length + " / " + rows.length + " bài khớp")
+                         : (rows.length + " bài chưa học");
+    list.querySelectorAll("[data-learn]").forEach(b =>
+      b.addEventListener("click", () => startLearn(b.dataset.learn)));
+    list.querySelectorAll("[data-mark]").forEach(cb => cb.addEventListener("click", e => {
+      e.stopPropagation();                       // đừng mở phiên học khi bấm ô tick
+      const l = (s.lessons||[]).find(x => x.id === cb.dataset.mark);
+      if(!l) return;
+      if(cb.checked){
+        const n = lessonMCQ(l).filter(q => !(db.fsrs[q.id]||{}).last).length;
+        if(!confirm('Đánh dấu "' + l.name + '" là ĐÃ ĐÁNH XONG?\n\n'
+          + n + ' câu chưa có dữ liệu sẽ được đưa thẳng sang ô Ôn tập.\n\n'
+          + 'Vì không có điểm thật để dựng lại, app ghi độ bền THẤP — những câu này '
+          + 'sẽ quay lại trong vài ngày tới và được chấm lại bằng dữ liệu thật của bạn.\n\n'
+          + 'Bỏ tick sẽ hoàn tác, và KHÔNG đụng tới phần bạn đã đánh thật.')){
+          cb.checked = false; return;
+        }
+        const n2 = markLessonDone(l);
+        toast('Đã đánh dấu ' + n2 + ' câu — bài "' + l.name + '" chuyển sang ô Ôn tập.');
+      }else{
+        const n = unmarkLesson(l);
+        toast(n ? 'Đã gỡ đánh dấu ' + n + ' câu.' : 'Bài này không có câu nào đang đánh dấu ước lượng.');
+      }
+      autoLastAt = 0; if(typeof autoSync === "function") autoSync();
+      closeModal(); openLearnPicker(); home();
+    }));
+  }
+  find.addEventListener("input", draw);
+  /* Enter khi chỉ còn đúng một bài khớp thì vào học luôn — đỡ phải rời bàn phím. */
+  find.addEventListener("keydown", e => {
+    if(e.key !== "Enter") return;
+    const qy = noAccent(find.value.trim());
+    const hit = qy ? rows.filter(r => r.key.includes(qy)) : [];
+    if(hit.length === 1) startLearn(hit[0].id);
+  });
+  draw();
+  if(!isPhone()) setTimeout(() => find.focus(), 40);   // trên điện thoại đừng bật bàn phím ngay
+}
+
+function startLearn(lessonId){
+  const s = subj(), l = (s.lessons||[]).find(x => x.id === lessonId);
+  if(!l) return;
+  const unlocked = clinicalUnlocked(l);
+  const fresh = lessonMCQ(l).filter(q => !(db.fsrs[q.id]||{}).last && (!q.clinical || unlocked));
+  if(!fresh.length){ toast("Bài này không còn câu trắc nghiệm nào chưa đánh.", true); return; }
+  closeModal();
+  setReading(s, l.id);
+  const cards = shuffle(fresh.map(q => ({ it:Object.assign({ lesson:l.name, lessonId:l.id }, q), demotedFrom:null, wasNew:true })));
+  askConfidence(() => startRun(cards, "Học bài mới — " + l.name, { learn:true, lessonId:l.id }), l.id);
+}
+
+function openModal(html){ $("#mboxIn").innerHTML = html; $("#modal").classList.remove("hidden");
+  $("#mboxIn").querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+  document.addEventListener("keydown", escClose); }
+function closeModal(){ $("#modal").classList.add("hidden"); $("#mboxIn").innerHTML = ""; document.removeEventListener("keydown", escClose); }
+function escClose(e){ if(e.key === "Escape") closeModal(); }
+$("#modal").addEventListener("click", e => { if(e.target.id === "modal") closeModal(); });
+
+/* =====================================================================
+   KHỞI ĐỘNG
+   ===================================================================== */
+
+/* =====================================================================
+   TỰ ĐỘNG ĐỒNG BỘ
+   Trước đây phải tự bấm "Đồng bộ ngay" thì bài mới thêm ở máy khác mới
+   hiện ra. Giờ app tự kéo về khi mở trang, khi quay lại tab, và tự đẩy
+   lên sau mỗi phiên học. syncNow() vốn là hợp nhất hai chiều nên chạy
+   ngầm vẫn an toàn — không bên nào ghi đè bên nào.
+   ===================================================================== */
+let autoBusy = false, autoLastAt = 0, autoGuard = null;
+async function autoSync(reason){
+  const st = db.sync || {};
+  if(!st.token || !st.gistId) return;                  // chưa thiết lập thì thôi
+  if(autoBusy) return;
+  /* Có thay đổi chưa đẩy lên thì bỏ qua giãn cách — không được để tiến độ
+     nằm lại trong máy rồi bị bản trên kho ghi đè ở lần mở sau.           */
+  if(!db.dirty && Date.now() - autoLastAt < 20000) return;
+  if(!navigator.onLine) return;
+  autoBusy = true; autoLastAt = Date.now();
+  /* Safari trên iPhone/iPad đóng băng tab khi bạn chuyển app, và lời gọi
+     mạng đang dở có thể không bao giờ trả lời. Không có chốt thời gian
+     này thì autoBusy kẹt ở true vĩnh viễn và máy đó ngừng đồng bộ hẳn.   */
+  clearTimeout(autoGuard);
+  autoGuard = setTimeout(() => { autoBusy = false; }, 45000);
+  syncBadge("đang đồng bộ…");
+  try{
+    const m = await syncNow(true);
+    const got = (m.addedQ > 0 || m.addedLog > 0);
+    syncBadge(got ? "đã nhận dữ liệu mới" : "đã đồng bộ", 2500);
+    // Chỉ vẽ lại khi thật sự có gì mới, và chỉ khi đang ở màn hình chính
+    if(got && !$("#v-home").classList.contains("hidden")) home();
+  }catch(e){
+    syncBadge("chưa đồng bộ được — sẽ thử lại", 3500);
+  }finally{ clearTimeout(autoGuard); autoBusy = false; }
+}
+function syncBadge(text, hideAfter){
+  let b = $("#syncBadge");
+  if(!b){
+    b = document.createElement("div"); b.id = "syncBadge";
+    b.style.cssText = "position:fixed;left:12px;bottom:12px;z-index:60;background:var(--card);"
+      + "border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:12px;"
+      + "color:var(--ink2);box-shadow:var(--sh);opacity:0;transition:opacity .25s";
+    document.body.appendChild(b);
+  }
+  b.textContent = text; b.style.opacity = "1";
+  clearTimeout(b._t);
+  if(hideAfter) b._t = setTimeout(() => { b.style.opacity = "0"; }, hideAfter);
+}
+
+// Quay lại tab sau khi học ở máy khác thì kéo về luôn
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){
+    // Đang giữa một câu thì bấm dừng đồng hồ của câu đó
+    if(R && R.qStart && !R.hidAt) R.hidAt = Date.now();
+    /* Sắp rời trang — ghi ngay phần đang chờ, đừng để trong hàng đợi trì hoãn. */
+    if(saveT) saveNow();
+    if(db.dirty){ autoLastAt = 0; autoSync("rời trang"); }
+  }else{
+    // Quay lại: cộng dồn quãng vắng mặt rồi chạy tiếp
+    if(R && R.hidAt){ R.qPaused = (R.qPaused||0) + (Date.now() - R.hidAt); R.hidAt = 0; }
+    autoSync("quay lại tab");
+  }
+});
+window.addEventListener("pagehide", () => { if(saveT) saveNow(); });
+window.addEventListener("online", () => autoSync("có mạng lại"));
+
+/* Nạp dữ liệu là việc bất đồng bộ (phải hỏi IndexedDB), nên toàn bộ phần
+   khởi động phải chờ xong mới vẽ — và nhất là mới được đồng bộ. Đồng bộ
+   khi db còn rỗng sẽ đẩy cái rỗng đó đè lên kho.                        */
+(async function boot(){
+  try{ await load(); }
+  catch(e){ console.warn("Nạp dữ liệu lỗi", e); normalize(); }
+  applyRead(); fillSubjSel();
+  if(db.subjects.length && liveItems(subj()).length) home();
+  else if(db.subjects.length) showBank();
+  else startSetup(true);
+  autoSync();
+})();
+</script>
+</body>
+</html>
